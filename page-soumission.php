@@ -40,8 +40,9 @@ get_header(); ?>
         <button class="som-filter-btn" data-cat="Hoodies">🏃 Hoodies</button>
         <button class="som-filter-btn" data-cat="Polos">👔 Polos</button>
         <button class="som-filter-btn" data-cat="Casquettes">🧢 Casquettes</button>
-        <button class="som-filter-btn" data-cat="Pantalons">👖 Pantalons &amp; Shorts</button>
+        <button class="som-filter-btn" data-cat="Pantalons &amp; Shorts">👖 Pantalons &amp; Shorts</button>
       </div>
+      <!-- Sous-catégories injectées dynamiquement par JS -->
       <div class="som-grid" id="som-grid">
         <div class="som-loading"><div class="som-spinner"></div><p>Chargement des produits…</p></div>
       </div>
@@ -71,7 +72,7 @@ get_header(); ?>
         <div class="som-step" data-step="4"><div class="som-step__num">4</div><span>Confirmation</span></div>
       </div>
 
-      <!-- ÉTAPE 1 -->
+      <!-- ÉTAPE 1 : QUANTITÉS -->
       <div class="som-panel active" id="panel-1">
         <div class="som-panel__header">
           <span class="som-panel__num">01</span>
@@ -104,16 +105,24 @@ get_header(); ?>
         </div>
       </div>
 
-      <!-- ÉTAPE 2 -->
+      <!-- ÉTAPE 2 : LOGO -->
       <div class="som-panel" id="panel-2">
         <div class="som-panel__header">
           <span class="som-panel__num">02</span>
           <div><h2>Votre logo</h2><p>Format vectoriel requis pour une impression de qualité optimale.</p></div>
         </div>
         <div class="som-logo-toggle">
-          <button class="som-logo-toggle__btn active" id="btn-has-logo" type="button" onclick="SOM.setLogoMode('has')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>J'ai mon logo</button>
-          <button class="som-logo-toggle__btn" id="btn-no-logo" type="button" onclick="SOM.setLogoMode('no')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Je n'ai pas de logo vectoriel</button>
+          <button class="som-logo-toggle__btn active" id="btn-has-logo" type="button" onclick="SOM.setLogoMode('has')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            J'ai mon logo
+          </button>
+          <button class="som-logo-toggle__btn" id="btn-no-logo" type="button" onclick="SOM.setLogoMode('no')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Je n'ai pas de logo vectoriel
+          </button>
         </div>
+
+        <!-- Mode : a un logo -->
         <div id="logo-upload-section">
           <div class="som-dropzone" id="dropzone" ondragover="SOM.dragOver(event)" ondragleave="SOM.dragLeave(event)" ondrop="SOM.dropFile(event)" onclick="document.getElementById('logo-input').click()">
             <input type="file" id="logo-input" name="logo_file" accept=".ai,.svg,image/svg+xml,application/postscript" style="display:none" onchange="SOM.handleFile(this.files[0])">
@@ -145,16 +154,48 @@ get_header(); ?>
             <textarea class="som-textarea" id="logo-notes" name="logo_notes" rows="3" placeholder="Couleurs préférées, variante à utiliser, contraintes particulières…"></textarea>
           </div>
         </div>
+
+        <!-- Mode : pas de logo vectoriel -->
         <div id="logo-designer-section" style="display:none">
           <div class="som-designer-alert">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <div><strong>Service de design disponible</strong><p>Notre designer peut créer votre fichier vectoriel. Des frais supplémentaires s'appliquent et le délai de livraison sera plus long. Nous vous confirmerons les détails dans la soumission.</p></div>
+            <div>
+              <strong>Service de design disponible</strong>
+              <p>Notre designer peut créer votre fichier vectoriel. Des frais supplémentaires s'appliquent et le délai de livraison sera plus long. Nous vous confirmerons les détails dans la soumission.</p>
+            </div>
           </div>
           <div class="som-field-group">
             <label class="som-label" for="logo-description">Décrivez votre logo <span class="som-required">*</span></label>
             <textarea class="som-textarea" id="logo-description" name="logo_description" rows="4" placeholder="Décrivez votre logo : texte, formes, couleurs, style souhaité… Plus vous êtes précis, mieux c'est!"></textarea>
           </div>
+          <!-- Upload image de référence -->
+          <div class="som-field-group som-mt-2">
+            <label class="som-label">Image de référence <span class="som-optional">(optionnel mais recommandé)</span></label>
+            <p style="font-size:13px;color:var(--som-ink-3);margin-bottom:8px">Déposez une image existante de votre logo (JPG, PNG, PDF…) pour aider notre designer.</p>
+            <div class="som-ref-upload" onclick="document.getElementById('logo-ref-input').click()">
+              <input type="file" id="logo-ref-input" name="logo_ref_file"
+                     accept=".jpg,.jpeg,.png,.pdf,.gif,.bmp,.webp"
+                     style="display:none" onchange="SOM.handleRefFile(this.files[0])">
+              <div id="ref-idle">
+                <div style="font-size:28px;margin-bottom:8px">🖼️</div>
+                <p class="som-ref-upload__title">Glissez ou cliquez pour ajouter une image de référence</p>
+                <p class="som-ref-upload__sub">Ce fichier servira de référence seulement — pas pour l'impression</p>
+                <div class="som-ref-formats">
+                  <span class="som-ref-format">JPG</span>
+                  <span class="som-ref-format">PNG</span>
+                  <span class="som-ref-format">PDF</span>
+                  <span class="som-ref-format">GIF</span>
+                </div>
+              </div>
+              <div id="ref-success">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--som-green)"><polyline points="20 6 9 17 4 12"/></svg>
+                <p id="ref-filename" style="font-weight:600;font-size:14px"></p>
+                <p style="font-size:12px;color:var(--som-ink-3)">Image de référence ajoutée</p>
+              </div>
+            </div>
+          </div>
         </div>
+
         <div id="logo-error" class="som-error" style="display:none"></div>
         <div class="som-panel__actions">
           <button class="som-btn som-btn--ghost" type="button" onclick="SOM.goStep(1)">← Retour</button>
@@ -162,7 +203,7 @@ get_header(); ?>
         </div>
       </div>
 
-      <!-- ÉTAPE 3 -->
+      <!-- ÉTAPE 3 : COORDONNÉES -->
       <div class="som-panel" id="panel-3">
         <div class="som-panel__header">
           <span class="som-panel__num">03</span>
@@ -191,7 +232,7 @@ get_header(); ?>
         </div>
       </div>
 
-      <!-- ÉTAPE 4 -->
+      <!-- ÉTAPE 4 : RÉCAPITULATIF -->
       <div class="som-panel" id="panel-4">
         <div class="som-panel__header">
           <span class="som-panel__num">04</span>
@@ -219,7 +260,10 @@ get_header(); ?>
           <input type="hidden" name="logo_description" id="h-logo-description">
           <div class="som-panel__actions">
             <button class="som-btn som-btn--ghost" type="button" onclick="SOM.goStep(3)">← Retour</button>
-            <button class="som-btn som-btn--submit" type="submit" id="btn-submit"><span>Envoyer ma demande de soumission</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+            <button class="som-btn som-btn--submit" type="submit" id="btn-submit">
+              <span>Envoyer ma demande de soumission</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
           </div>
         </form>
       </div>
