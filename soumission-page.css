@@ -246,3 +246,163 @@
   .som-panel__num{font-size:2.5rem;}
   .som-souscats{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;padding:10px 12px;}
 }
+
+/* ── Modale produit ── */
+.som-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.som-modal-overlay.active { display: flex; }
+.som-modal {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 2rem;
+}
+.som-modal__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  padding: 4px;
+}
+.som-modal__close:hover { color: #333; }
+.som-modal__body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+@media (max-width: 640px) {
+  .som-modal__body { grid-template-columns: 1fr; }
+}
+.som-modal__main-img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+.som-modal__main-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.som-modal__thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.som-modal__thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  background: #f5f5f5;
+}
+.som-modal__thumb.active { border-color: var(--som-primary, #00b894); }
+.som-modal__thumb img { width: 100%; height: 100%; object-fit: contain; }
+.som-modal__sku { color: #888; font-size: 13px; margin: 4px 0 16px; }
+.som-modal__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.som-modal__swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  outline: 2px solid #ddd;
+  transition: outline-color 0.2s;
+}
+.som-modal__swatch.active {
+  outline-color: var(--som-primary, #00b894);
+}
+.som-modal__swatch--out { opacity: 0.35; cursor: not-allowed; }
+.som-modal__cta { width: 100%; margin-top: 1.5rem; justify-content: center; }
+
+/* ── Pagination ── */
+.som-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 0;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.som-pagination__info {
+  font-size: 13px;
+  color: #888;
+}
+.som-pagination__pages {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.som-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: #333;
+}
+.som-page-btn:hover:not(:disabled) {
+  border-color: #1D9E75;
+  color: #1D9E75;
+}
+.som-page-btn.active {
+  background: #1D9E75;
+  border-color: #1D9E75;
+  color: #fff;
+  font-weight: 500;
+}
+.som-page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.som-page-ellipsis {
+  padding: 0 4px;
+  color: #888;
+  font-size: 13px;
+}
+.som-pagination__perpage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.som-perpage-select {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  background: #fff;
+}
+.som-perpage-select:focus {
+  outline: none;
+  border-color: #1D9E75;
+}

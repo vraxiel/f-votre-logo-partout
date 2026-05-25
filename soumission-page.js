@@ -44,6 +44,8 @@
   };
 
   let allProducts = [];
+  let currentPage = 1;
+  let perPage = 24;
 
   /* ── Chargement menu catégories ── */
   async function loadCategories() {
@@ -74,6 +76,7 @@
       btn.addEventListener('click', () => {
         currentCat = btn.dataset.cat;
         currentSousCat = null;
+        currentPage = 1;
         filtersEl.querySelectorAll('.som-filter-btn').forEach(b =>
           b.classList.toggle('active', b.dataset.cat === currentCat)
         );
@@ -146,9 +149,15 @@
     if (!grid) return;
     if (!products.length) {
       grid.innerHTML = '<p style="padding:2rem;color:#888;text-align:center;grid-column:1/-1">Aucun produit dans cette catégorie.</p>';
+      renderPagination(0);
       return;
     }
-    grid.innerHTML = products.map((p) => {
+    const totalPages = Math.ceil(products.length / perPage);
+    if (currentPage > totalPages) currentPage = 1;
+    const start = (currentPage - 1) * perPage;
+    const paginated = products.slice(start, start + perPage);
+    renderPagination(products.length);
+    grid.innerHTML = paginated.map((p) => {
       const dispo = p.couleurs?.some(c => c.disponible) ?? true;
       const imgHtml = p.image
         ? `<img src="${p.image}" alt="${p.nom}" loading="lazy">`
@@ -177,6 +186,65 @@
           </div>
         </div>`;
     }).join('');
+  }
+
+
+  /* ── Pagination ── */
+  function renderPagination(total) {
+    let containerTop = document.getElementById('som-pagination-top');
+    if (!containerTop) {
+      containerTop = document.createElement('div');
+      containerTop.id = 'som-pagination-top';
+      containerTop.className = 'som-pagination som-pagination--top';
+      const grid = document.getElementById('som-grid');
+      grid.parentNode.insertBefore(containerTop, grid);
+    }
+    let container = document.getElementById('som-pagination');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'som-pagination';
+      container.className = 'som-pagination';
+      const grid = document.getElementById('som-grid');
+      grid.parentNode.insertBefore(container, grid.nextSibling);
+    }
+    if (total === 0) { container.innerHTML = ''; return; }
+    const totalPages = Math.ceil(total / perPage);
+    const perPageOptions = [24, 48, 96].map(n =>
+      `<option value="${n}" ${perPage === n ? 'selected' : ''}>${n} par page</option>`
+    ).join('');
+    let pages = '';
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+        pages += `<button class="som-page-btn${i === currentPage ? ' active' : ''}" onclick="SOM.goPage(${i})">${i}</button>`;
+      } else if (i === currentPage - 3 || i === currentPage + 3) {
+        pages += `<span class="som-page-ellipsis">…</span>`;
+      }
+    }
+    containerTop.innerHTML = container.innerHTML = `
+      <div class="som-pagination__info">${total} produit${total > 1 ? 's' : ''}</div>
+      <div class="som-pagination__pages">
+        <button class="som-page-btn" onclick="SOM.goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>←</button>
+        ${pages}
+        <button class="som-page-btn" onclick="SOM.goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>→</button>
+      </div>
+      <div class="som-pagination__perpage">
+        <select class="som-perpage-select" onchange="SOM.setPerPage(parseInt(this.value))">${perPageOptions}</select>
+      </div>`;
+  }
+
+  function goPage(page) {
+    const products = filterProducts(currentCat, currentSousCat);
+    const totalPages = Math.ceil(products.length / perPage);
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    renderCatalogue();
+    document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function setPerPage(n) {
+    perPage = n;
+    currentPage = 1;
+    renderCatalogue();
   }
 
   /* ── Sous-catégories dynamiques ── */
@@ -211,6 +279,7 @@
     bar.querySelectorAll('.som-souscat-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         currentSousCat = btn.dataset.souscat;
+        currentPage = 1;
         bar.querySelectorAll('.som-souscat-btn').forEach(b =>
           b.classList.toggle('active', b.dataset.souscat === currentSousCat)
         );
@@ -453,7 +522,7 @@
     const placementLabel = document.querySelector('.som-placement-card:has(input:checked) .som-placement-card__label')?.textContent || state.placement;
     const logoInfo = state.logoMode === 'has' ? (state.logoName || '—') : 'Service designer demandé';
     const grandTotal = state.colorBlocks.reduce((s, b) => s + Object.values(b.quantities).reduce((a, c) => a + c, 0), 0);
-    container.innerHTML = `
+    containerTop.innerHTML = container.innerHTML = `
       <div class="som-recap-section"><h4>Produit</h4><p>${state.product?.name || '—'} <span style="color:#888">(SKU: ${state.product?.sku || '—'})</span></p></div>
       <div class="som-recap-section"><h4>Quantités & couleurs</h4>${blocksHtml}<p style="margin-top:8px"><strong>Total : ${grandTotal} articles</strong></p><p>Emplacement : ${placementLabel}</p></div>
       <div class="som-recap-section"><h4>Logo</h4><p>${logoInfo}</p></div>
@@ -626,7 +695,8 @@
     selectProduct, resetProduct, goStep, addColorBlock, removeColorBlock,
     updateColor, updateQty, setLogoMode, handleFile, handleRefFile,
     clearLogo, dragOver, dragLeave, dropFile, buildRecap,
-    openModal, openModalIdx, closeModal, selectSwatch, setMainImg, choisirProduit
+    openModal, openModalIdx, closeModal, selectSwatch, setMainImg, choisirProduit,
+    goPage, setPerPage
   };
 
 })();
