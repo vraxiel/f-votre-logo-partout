@@ -17,6 +17,20 @@ HEADERS = {
 BASE_DIR     = "/home/alex/scraper/fournisseurs/tshirtideal"
 STOCK_FILE   = os.path.join(BASE_DIR, "products.json")
 OVERRIDES_FILE = os.path.join(BASE_DIR, "overrides.json")
+COULEURS_FILE  = os.path.join(BASE_DIR, "traductions_couleurs.json")
+
+def load_couleurs_fr():
+    if os.path.exists(COULEURS_FILE):
+        with open(COULEURS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+COULEURS_FR = load_couleurs_fr()
+
+def traduire_couleur(nom):
+    if not nom or not isinstance(nom, str):
+        return nom
+    return COULEURS_FR.get(nom.lower(), nom)
 
 CHAMPS_PRIVES = {"prix", "price", "prix_achat", "cout", "cost", "note_interne", "_commentaire", "_champs_disponibles"}
 
@@ -42,6 +56,11 @@ def load_products():
         sku = product.get("sku", "")
 
         p = {k: v for k, v in product.items() if k not in CHAMPS_PRIVES}
+        # Traduire les noms de couleurs en français
+        if "couleurs" in p:
+            for couleur in p["couleurs"]:
+                if isinstance(couleur, dict) and "nom" in couleur:
+                    couleur["nom"] = traduire_couleur(couleur["nom"])
 
         if sku in overrides:
             for key, value in overrides[sku].items():

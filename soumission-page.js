@@ -24,6 +24,47 @@
     'platinum':'#e0e0e0','carbon':'#555555','classic-navy':'#1b3a6e',
   };
 
+
+  const COLOR_NAME_FR = {
+    'black':'Noir','white':'Blanc','blanc':'Blanc','noir':'Noir',
+    'navy':'Marine','marine':'Marine','red':'Rouge','rouge':'Rouge',
+    'royal':'Bleu royal','forest':'Vert forêt','gold':'Or','orange':'Orange',
+    'maroon':'Bordeaux','purple':'Mauve','ash':'Gris cendré','grey':'Gris',
+    'gray':'Gris','sport-grey':'Gris sport','graphite-heather':'Graphite chiné',
+    'dark-heather':'Gris foncé chiné','carolina-blue':'Bleu Carolina',
+    'irish-green':'Vert irlandais','garnet':'Grenat','safety-green':'Vert sécurité',
+    'safety-orange':'Orange sécurité','cardinal':'Cardinal','charcoal':'Charbon',
+    'heather':'Chiné','athletic-heather':'Gris athlétique chiné',
+    'light-blue':'Bleu ciel','kelly-green':'Vert Kelly','brown':'Brun',
+    'sand':'Sable','military-green':'Vert militaire','mint-green':'Vert menthe',
+    'platinum':'Platine','carbon':'Carbone','classic-navy':'Marine classique',
+    'antique-cherry-red':'Rouge cerise antique','antique-heliconia':'Hélicoïne antique',
+    'antique-irish-green':'Vert irlandais antique','antique-orange':'Orange antique',
+    'antique-royal':'Bleu royal antique','antique-sapphire':'Saphir antique',
+    'antique-cherry':'Cerise antique','cherry-red':'Rouge cerise',
+    'daisy':'Jaune marguerite','heliconia':'Hélicoïne','indigo-blue':'Bleu indigo',
+    'iris':'Iris','jade-dome':'Dôme jade','kiwi':'Kiwi','lime':'Lime',
+    'natural':'Naturel','pink':'Rose','raspberry':'Framboise','sapphire':'Saphir',
+    'smoke':'Fumée','sport-dark-navy':'Marine foncé sport','tangerine':'Tangerine',
+    'tropical-blue':'Bleu tropical','tweed':'Tweed','violet':'Violet',
+    'yellow-haze':'Jaune brume','azalea':'Azalée','berry':'Baie',
+    'cherry-blossom':'Fleur de cerisier','cornsilk':'Cornsilk','denim':'Denim',
+    'heather-red':'Rouge chiné','heather-military-green':'Vert militaire chiné',
+    'heather-navy':'Marine chiné','heather-royal':'Bleu royal chiné',
+    'heather-sport-dark-navy':'Marine sport foncé chiné','ice-grey':'Gris glace',
+    'light-pink':'Rose pâle','metallic-gold':'Or métallique','mint':'Menthe',
+    'old-gold':'Or ancien','peacock':'Paon','pepper':'Poivre','pistachio':'Pistache',
+    'red-orange':'Rouge-orange','silver':'Argent','slate':'Ardoise',
+    'sport-scarlet-red':'Rouge écarlate sport','storm':'Orage','tan':'Beige',
+    'true-navy':'Marine vrai','true-royal':'Bleu royal vrai','white-on-white':'Blanc sur blanc',
+  };
+
+  function getNomCouleurFR(nom) {
+    if (!nom) return '';
+    const slug = nom.toLowerCase().replace(/\s+/g, '-');
+    return COLOR_NAME_FR[slug] || COLOR_NAME_FR[nom.toLowerCase()] || nom;
+  }
+
   window.SOM_COLOR_MAP = COLOR_MAP;
 
   // Catégories chargées dynamiquement depuis l'API
@@ -650,6 +691,8 @@
       mainEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ccc">Aucune image</div>`;
       thumbsEl.innerHTML = '';
     }
+    const couleurEl = document.getElementById('modal-couleur-nom');
+    if (couleurEl) couleurEl.textContent = getNomCouleurFR(couleur?.nom || '');
     const dispo = document.getElementById('modal-dispo');
     dispo.innerHTML = couleur?.disponible
       ? '<span style="color:#00b894;font-weight:600">En stock</span>'

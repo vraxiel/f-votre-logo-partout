@@ -39,8 +39,14 @@ get_header(); ?>
         <button class="som-filter-btn" data-cat="Coton ouatés">🧥 Coton ouatés</button>
         <button class="som-filter-btn" data-cat="Hoodies">🏃 Hoodies</button>
         <button class="som-filter-btn" data-cat="Polos">👔 Polos</button>
+        <button class="som-filter-btn" data-cat="Vêtements de sport">⚽ Vêtements de sport</button>
+        <button class="som-filter-btn" data-cat="Vêtements d'extérieur">🥼 Vêtements d'extérieur</button>
+        <button class="som-filter-btn" data-cat="Chemise habillée">🎽 Chemise habillée</button>
+        <button class="som-filter-btn" data-cat="Tuques">🧤 Tuques</button>
         <button class="som-filter-btn" data-cat="Casquettes">🧢 Casquettes</button>
         <button class="som-filter-btn" data-cat="Pantalons &amp; Shorts">👖 Pantalons &amp; Shorts</button>
+        <button class="som-filter-btn" data-cat="Sacs">🎒 Sacs</button>
+        <button class="som-filter-btn" data-cat="Accessoires">🎀 Accessoires</button>
       </div>
       <!-- Sous-catégories injectées dynamiquement par JS -->
       <div class="som-grid" id="som-grid">
@@ -282,6 +288,31 @@ get_header(); ?>
     </div>
   </section>
 
+</div>
+
+<!-- MODALE PRODUIT -->
+<div class="som-modal-overlay" id="som-modal-overlay" onclick="SOM.closeModal(event)">
+  <div class="som-modal" id="som-modal">
+    <button class="som-modal__close" onclick="SOM.closeModal()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="som-modal__body">
+      <div class="som-modal__gallery">
+        <div class="som-modal__main-img" id="modal-main-img"></div>
+        <div class="som-modal__thumbs" id="modal-thumbs"></div>
+      </div>
+      <div class="som-modal__info">
+        <h2 id="modal-nom"></h2>
+        <p id="modal-sku" class="som-modal__sku"></p>
+        <p id="modal-couleur-nom" class="som-modal__couleur-nom"></p>
+        <div class="som-modal__swatches" id="modal-swatches"></div>
+        <div id="modal-dispo"></div>
+        <button class="som-btn som-btn--primary som-modal__cta" onclick="SOM.choisirProduit()">
+          Demander une soumission
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <?php get_footer(); ?>

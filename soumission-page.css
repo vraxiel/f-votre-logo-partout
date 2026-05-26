@@ -406,3 +406,11 @@
   outline: none;
   border-color: #1D9E75;
 }
+
+/* ── Nom couleur modale ── */
+.som-modal__couleur-nom {
+  font-size: 14px;
+  color: #555;
+  margin: 2px 0 8px;
+  font-weight: 500;
+}
