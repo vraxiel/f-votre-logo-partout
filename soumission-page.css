@@ -549,3 +549,40 @@ h2#modal-nom {
   transition: color 0.2s;
 }
 .som-search-clear:hover { color: var(--som-text); }
+
+/* ── Fix recherche — override Storefront ── */
+#som-app input.som-search-input,
+#som-app input.som-search-input:focus {
+  padding: 11px 44px 11px 42px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border-color: var(--som-border2) !important;
+}
+#som-app input.som-search-input:focus {
+  border-color: var(--som-gold) !important;
+}
+
+/* ── Focus recherche — gold ── */
+#som-app input.som-search-input:focus {
+  border-color: var(--som-gold) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Éliminer le mauve Storefront sur tous les inputs ── */
+#som-app input:focus,
+#som-app select:focus,
+#som-app textarea:focus,
+#som-app button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+#som-app input.som-search-input:focus {
+  border-color: var(--som-gold) !important;
+}
+#som-app .som-filter-btn:focus,
+#som-app .som-souscat-btn:focus,
+#som-app .som-page-btn:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
