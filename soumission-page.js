@@ -486,28 +486,33 @@
 
   /* ── Blocs couleur ── */
   /* ── Tailles d'un produit ── */
-  function getTaillesProduit(item) {
-    const tailles = item.tailles || [];
-    if (tailles.length === 0) return SIZES; // chandail standard — pas de tailles dans products.json
-
+  function getTaillesProduit(item, selectedColor) {
     const OS_LABELS = ['os','one size','osfm','adjustable','taille unique','one-size'];
-    const labels = tailles
-      .filter(t => t.disponible !== false)
-      .map(t => {
-        const l = (t.label || '').trim();
-        const low = l.toLowerCase();
-        return OS_LABELS.includes(low) ? 'Taille unique' : l;
-      })
-      .filter(l => l.length > 0);
 
-    if (labels.length === 0) return SIZES;
+    function labelsFromTailles(tailles) {
+      if (!tailles || tailles.length === 0) return [];
+      return tailles
+        .filter(t => t.disponible !== false)
+        .map(t => {
+          const l = (t.label || '').trim();
+          return OS_LABELS.includes(l.toLowerCase()) ? 'Taille unique' : l;
+        })
+        .filter(l => l.length > 0);
+    }
 
-    // Si toutes les tailles correspondent exactement à SIZES → chandail standard
-    const toutesStandard = labels.length > 0 && labels.every(l => SIZES.includes(l));
-    if (toutesStandard) return labels;
+    // Priorité 1 : tailles de la couleur sélectionnée
+    if (selectedColor) {
+      const couleurData = (item.couleurs || []).find(c => c.nom === selectedColor);
+      const labels = labelsFromTailles(couleurData?.tailles);
+      if (labels.length > 0) return labels;
+    }
 
-    // Sinon : casquette, accessoire — retourner les tailles telles quelles
-    return labels;
+    // Priorité 2 : tailles globales du produit
+    const labels = labelsFromTailles(item.tailles);
+    if (labels.length > 0) return labels;
+
+    // Fallback : tailles standard
+    return SIZES;
   }
 
   function addColorBlock(defaultColor) {
@@ -518,7 +523,7 @@
     const startColor = defaultColor && couleurs.find(c => c.nom === defaultColor)
       ? defaultColor : (couleurs[0]?.nom || '');
     const block = { id: blockId, color: startColor, colorHex: '#ccc', quantities: {} };
-    getTaillesProduit(item).forEach(s => block.quantities[s] = 0);
+    getTaillesProduit(item, startColor).forEach(s => block.quantities[s] = 0);
     item.colorBlocks.push(block);
     renderColorBlocks();
   }
@@ -541,7 +546,7 @@
         const hex = COLOR_MAP[slug] || COLOR_MAP[(c.nom || '').toLowerCase()] || '#ccc';
         return `<option value="${c.nom}" data-hex="${hex}" ${c.nom === block.color ? 'selected' : ''}>${c.nom}</option>`;
       }).join('');
-      const sizeInputs = getTaillesProduit(item).map(size => `
+      const sizeInputs = getTaillesProduit(item, block.color).map(size => `
         <div class="som-size-cell">
           <label class="som-size-label">${size}</label>
           <input type="number" class="som-qty-input" min="0" value="${block.quantities[size] || 0}" step="1"
@@ -576,6 +581,11 @@
     block.colorHex = select.options[select.selectedIndex].dataset.hex || '#ccc';
     const preview = document.getElementById('preview-' + blockId);
     if (preview) preview.style.background = block.colorHex;
+    const newTailles = getTaillesProduit(panierItemEnCours, block.color);
+    block.quantities = {};
+    newTailles.forEach(s => block.quantities[s] = 0);
+    renderColorBlocks();
+    updateQtySummary();
   }
 
   function updateQty(blockId, size, val) {
