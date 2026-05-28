@@ -58,15 +58,7 @@ get_header(); ?>
   <section class="som-form-section" id="som-form-section" style="display:none;">
     <div class="som-container">
 
-      <div class="som-selected-product" id="som-selected-product">
-        <div class="som-selected-product__img" id="sel-img"></div>
-        <div class="som-selected-product__info">
-          <span class="som-selected-product__label">Produit sélectionné</span>
-          <h3 id="sel-name"></h3>
-          <p id="sel-sku"></p>
-        </div>
-        <button class="som-btn som-btn--ghost som-btn--sm" onclick="SOM.resetProduct()">← Changer de produit</button>
-      </div>
+
 
       <div class="som-steps" id="som-steps">
         <div class="som-step active" data-step="1"><div class="som-step__num">1</div><span>Quantités</span></div>
@@ -79,17 +71,42 @@ get_header(); ?>
       </div>
 
       <!-- ÉTAPE 1 : QUANTITÉS -->
+      <div class="som-panel-title">
+        <h2 class="som-panel-titre-h2">QUANTITÉS &amp; COULEURS</h2>
+        <p class="som-panel-titre-sub">Minimum <strong>12 articles par couleur</strong>. Répartissez les tailles comme vous voulez.</p>
+      </div>
       <div class="som-panel active" id="panel-1">
-        <div class="som-panel__header">
-          <span class="som-panel__num">01</span>
-          <div><h2>Quantités &amp; couleurs</h2><p>Minimum <strong>12 articles par couleur</strong>. Répartissez les tailles comme vous voulez.</p></div>
+        <div class="som-selected-product" id="som-selected-product">
+          <div class="som-selected-product__img" id="sel-img"></div>
+          <div class="som-selected-product__info">
+            <span class="som-selected-product__label">Produit sélectionné</span>
+            <h3 id="sel-name"></h3>
+            <p id="sel-sku"></p>
+          </div>
+
         </div>
         <div id="color-blocks-container"></div>
         <button class="som-btn som-btn--add-color" id="btn-add-color" type="button" onclick="SOM.addColorBlock()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Ajouter une autre couleur
         </button>
-        <div class="som-field-group som-mt-3">
+        <div class="som-qty-summary" id="qty-summary">
+          <div class="som-qty-summary__total">Total : <strong id="grand-total">0</strong> articles</div>
+          <p class="som-qty-summary__msg" id="qty-msg">Ajoutez au moins 12 articles par couleur pour continuer.</p>
+        </div>
+        <div class="som-panel__actions">
+          <button class="som-btn som-btn--ghost" onclick="SOM.retourCatalogue()">← Retour au catalogue</button>
+          <button class="som-btn som-btn--primary" id="btn-next-1" type="button" disabled onclick="SOM.goStep(2)">Continuer vers le logo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 2 : LOGO -->
+      <div class="som-panel" id="panel-2">
+        <div class="som-panel__header">
+          <span class="som-panel__num">02</span>
+          <div><h2>Votre logo</h2><p>Format vectoriel requis pour une impression de qualité optimale.</p></div>
+        </div>
+        <div class="som-placement-section som-mt-2">
           <label class="som-label">Emplacement d'impression <span class="som-required">*</span></label>
           <div class="som-placements" id="placement-grid">
             <label class="som-placement-card"><input type="radio" name="placement" value="avant-coeur" data-price="2.00" checked><span class="som-placement-card__label">Avant — Cœur</span><span class="som-placement-card__size">4" × 4"</span><span class="som-placement-card__price">+2.00$/article</span></label>
@@ -100,22 +117,9 @@ get_header(); ?>
             <label class="som-placement-card"><input type="radio" name="placement" value="manche-droite" data-price="2.00"><span class="som-placement-card__label">Manche droite</span><span class="som-placement-card__size">11" × 2"</span><span class="som-placement-card__price">+2.00$/article</span></label>
             <label class="som-placement-card"><input type="radio" name="placement" value="autre" data-price="0"><span class="som-placement-card__label">Autre</span><span class="som-placement-card__size">Sur mesure</span><span class="som-placement-card__price">À confirmer</span></label>
           </div>
-          <p class="som-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Grandeur maximale d'impression : <strong>13 pouces</strong></p>
         </div>
-        <div class="som-qty-summary" id="qty-summary">
-          <div class="som-qty-summary__total">Total : <strong id="grand-total">0</strong> articles</div>
-          <p class="som-qty-summary__msg" id="qty-msg">Ajoutez au moins 12 articles par couleur pour continuer.</p>
-        </div>
-        <div class="som-panel__actions">
-          <button class="som-btn som-btn--primary" id="btn-next-1" type="button" disabled onclick="SOM.goStep(2)">Continuer vers le logo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
-        </div>
-      </div>
-
-      <!-- ÉTAPE 2 : LOGO -->
-      <div class="som-panel" id="panel-2">
-        <div class="som-panel__header">
-          <span class="som-panel__num">02</span>
-          <div><h2>Votre logo</h2><p>Format vectoriel requis pour une impression de qualité optimale.</p></div>
+        <div class="som-mt-3">
+          <label class="som-label">Votre logo</label>
         </div>
         <div class="som-logo-toggle">
           <button class="som-logo-toggle__btn active" id="btn-has-logo" type="button" onclick="SOM.setLogoMode('has')">
@@ -205,7 +209,7 @@ get_header(); ?>
         <div id="logo-error" class="som-error" style="display:none"></div>
         <div class="som-panel__actions">
           <button class="som-btn som-btn--ghost" type="button" onclick="SOM.goStep(1)">← Retour</button>
-          <button class="som-btn som-btn--primary" id="btn-next-2" type="button" disabled onclick="SOM.goStep(3)">Continuer aux coordonnées <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="som-btn som-btn--primary" id="btn-next-2" type="button" disabled onclick="SOM.ajouterAuPanier()">Ajouter au panier <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
       </div>
 

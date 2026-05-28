@@ -586,3 +586,117 @@ h2#modal-nom {
   outline: none !important;
   box-shadow: none !important;
 }
+
+
+
+
+/* ══ PANEL-1 — Carte unifiée ══ */
+
+/* Steps */
+#som-app .som-steps {
+  background: var(--som-black);
+  border: 1px solid var(--som-border2);
+  border-bottom: none;
+  padding: 14px 20px;
+  margin-bottom: 0;
+  justify-content: flex-start;
+}
+
+/* Titre au-dessus du cadre */
+#som-app .som-panel-title { padding: 16px 0 10px; }
+#som-app .som-panel-titre-h2 {
+  font-family: var(--som-font-display) !important;
+  font-size: 1.8rem !important;
+  letter-spacing: 3px !important;
+  color: var(--som-text) !important;
+  font-weight: 400 !important;
+}
+#som-app .som-panel-titre-sub {
+  font-size: 13px;
+  color: var(--som-muted);
+  margin-top: 2px;
+}
+
+/* Cadre unique */
+#som-app #panel-1 {
+  border: 1px solid var(--som-border2) !important;
+  background: var(--som-surface) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+#som-app #panel-1 .som-panel__header { display: none; }
+
+/* Produit — rangée compacte dans le cadre */
+#som-app #panel-1 .som-selected-product {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  background: var(--som-black) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--som-border2) !important;
+  margin: 0 !important;
+  padding: 12px 20px !important;
+}
+#som-app #panel-1 .som-selected-product .som-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Couleurs */
+#som-app #panel-1 #color-blocks-container { padding: 0 20px !important; }
+
+/* Bloc couleur — sans boîte */
+#som-app #panel-1 .som-color-block {
+  border: none !important;
+  border-bottom: 1px solid var(--som-border) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 16px 0 !important;
+  margin: 0 !important;
+}
+#som-app #panel-1 .som-color-block:last-child { border-bottom: none !important; }
+#som-app #panel-1 .som-color-block--ok {
+  border-left: 3px solid var(--som-green) !important;
+  padding-left: 13px !important;
+}
+
+/* Ajouter couleur */
+#som-app #panel-1 .som-btn--add-color {
+  margin: 4px 20px 0 !important;
+  width: calc(100% - 40px) !important;
+}
+
+/* Hint */
+#som-app #panel-1 .som-field-group.som-mt-3 { padding: 8px 20px 0 !important; }
+
+/* Total */
+#som-app #panel-1 .som-qty-summary {
+  margin: 0 !important;
+  padding: 14px 20px !important;
+  border: none !important;
+  border-top: 1px solid var(--som-border2) !important;
+  background: transparent !important;
+}
+
+/* Bouton continuer */
+#som-app #panel-1 .som-panel__actions {
+  margin: 0 !important;
+  padding: 14px 20px !important;
+  border-top: 1px solid var(--som-border2) !important;
+  justify-content: flex-end;
+}
+
+/* ── Actions panel-1 — retour à gauche, continuer à droite ── */
+#som-app #panel-1 .som-panel__actions {
+  justify-content: space-between !important;
+}
+
+/* ── Produit sans séparation visuelle ── */
+#som-app #panel-1 .som-selected-product {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+#som-app #panel-1 #color-blocks-container {
+  border-top: 1px solid var(--som-border2) !important;
+  margin-top: 12px !important;
+}

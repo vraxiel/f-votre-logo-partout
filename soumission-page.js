@@ -564,7 +564,7 @@
             </div>
             <div class="som-color-block__total">
               <span id="block-total-${block.id}" class="${ok ? 'ok' : ''}">${blockTotal}</span> articles
-              ${ok ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--som-green)"><polyline points="20 6 9 17 4 12"/></svg>' : '<span style="color:#cc4444;font-size:12px">min. 12</span>'}
+              <span id="min-badge-${block.id}">${ok ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--som-green)"><polyline points="20 6 9 17 4 12"/></svg>' : '<span style="color:#cc4444;font-size:12px">min. 12</span>'}</span>
             </div>
             ${item.colorBlocks.length > 1 ? `<button class="som-btn-remove" type="button" onclick="SOM.removeColorBlock('${block.id}')" title="Supprimer">×</button>` : ''}
           </div>
@@ -599,6 +599,13 @@
     if (totalEl) { totalEl.textContent = blockTotal; totalEl.className = ok ? 'ok' : ''; }
     const blockEl = document.getElementById('block-' + blockId);
     if (blockEl) blockEl.classList.toggle('som-color-block--ok', ok);
+    // Mettre à jour le badge min. 12 / checkmark
+    const minBadge = document.getElementById('min-badge-' + blockId);
+    if (minBadge) {
+      minBadge.innerHTML = ok
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--som-green)"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<span style="color:#cc4444;font-size:12px">min. 12</span>';
+    }
     updateQtySummary();
   }
 
