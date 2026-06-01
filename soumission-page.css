@@ -724,3 +724,10 @@ h2#modal-nom {
 #som-app .som-panel-title {
   padding: 0 0 16px 0 !important;
 }
+
+/* ── Masquer headers panel redondants (titre dynamique au-dessus) ── */
+#som-app #panel-2 .som-panel__header,
+#som-app #panel-3 .som-panel__header,
+#som-app #panel-4 .som-panel__header {
+  display: none !important;
+}

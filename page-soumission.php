@@ -72,8 +72,8 @@ get_header(); ?>
 
       <!-- ÉTAPE 1 : QUANTITÉS -->
       <div class="som-panel-title">
-        <h2 class="som-panel-titre-h2">QUANTITÉS &amp; COULEURS</h2>
-        <p class="som-panel-titre-sub">Minimum <strong>12 articles par couleur</strong>. Répartissez les tailles comme vous voulez.</p>
+        <h2 class="som-panel-titre-h2" id="som-step-titre">QUANTITÉS &amp; COULEURS</h2>
+        <p class="som-panel-titre-sub" id="som-step-sub">Minimum <strong>12 articles par couleur</strong>. Répartissez les tailles comme vous voulez.</p>
       </div>
       <div class="som-panel active" id="panel-1">
         <div class="som-selected-product" id="som-selected-product">
@@ -106,47 +106,38 @@ get_header(); ?>
           <span class="som-panel__num">02</span>
           <div><h2>Votre logo</h2><p>Format vectoriel requis pour une impression de qualité optimale.</p></div>
         </div>
-        <div class="som-placement-section som-mt-2">
-          <label class="som-label">Emplacement d'impression <span class="som-required">*</span></label>
-          <div class="som-placements" id="placement-grid">
-            <label class="som-placement-card"><input type="radio" name="placement" value="avant-coeur" data-price="2.00" checked><span class="som-placement-card__label">Avant — Cœur</span><span class="som-placement-card__size">4" × 4"</span><span class="som-placement-card__price">+2.00$/article</span></label>
-            <label class="som-placement-card"><input type="radio" name="placement" value="avant-centre-petit" data-price="2.25"><span class="som-placement-card__label">Avant — Centré petit</span><span class="som-placement-card__size">6" × 6"</span><span class="som-placement-card__price">+2.25$/article</span></label>
-            <label class="som-placement-card"><input type="radio" name="placement" value="avant-centre-grand" data-price="7.00"><span class="som-placement-card__label">Avant — Centré grand</span><span class="som-placement-card__size">11" × 11"</span><span class="som-placement-card__price">+7.00$/article</span></label>
-            <label class="som-placement-card"><input type="radio" name="placement" value="arriere" data-price="6.60"><span class="som-placement-card__label">Arrière</span><span class="som-placement-card__size">11" × 11"</span><span class="som-placement-card__price">+6.60$/article</span></label>
-            <label class="som-placement-card"><input type="radio" name="placement" value="manche-gauche" data-price="2.00"><span class="som-placement-card__label">Manche gauche</span><span class="som-placement-card__size">11" × 2"</span><span class="som-placement-card__price">+2.00$/article</span></label>
-            <label class="som-placement-card"><input type="radio" name="placement" value="manche-droite" data-price="2.00"><span class="som-placement-card__label">Manche droite</span><span class="som-placement-card__size">11" × 2"</span><span class="som-placement-card__price">+2.00$/article</span></label>
-            <label class="som-placement-card"><input type="radio" name="placement" value="autre" data-price="0"><span class="som-placement-card__label">Autre</span><span class="som-placement-card__size">Sur mesure</span><span class="som-placement-card__price">À confirmer</span></label>
-          </div>
-        </div>
-        <div class="som-mt-3">
-          <label class="som-label">Votre logo</label>
-        </div>
+        <label class="som-label">Votre logo</label>
         <div class="som-logo-toggle">
           <button class="som-logo-toggle__btn active" id="btn-has-logo" type="button" onclick="SOM.setLogoMode('has')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            J'ai mon logo
+            <span><strong>J'ai mon logo</strong><br><small style="opacity:.7;font-weight:400">Fichier prêt à envoyer</small></span>
           </button>
           <button class="som-logo-toggle__btn" id="btn-no-logo" type="button" onclick="SOM.setLogoMode('no')">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Je n'ai pas de logo vectoriel
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+            <span><strong>J'ai besoin d'un designer</strong><br><small style="opacity:.7;font-weight:400">On crée votre logo</small></span>
           </button>
         </div>
 
         <!-- Mode : a un logo -->
         <div id="logo-upload-section">
           <div class="som-dropzone" id="dropzone" ondragover="SOM.dragOver(event)" ondragleave="SOM.dragLeave(event)" ondrop="SOM.dropFile(event)" onclick="document.getElementById('logo-input').click()">
-            <input type="file" id="logo-input" name="logo_file" accept=".ai,.svg,image/svg+xml,application/postscript" style="display:none" onchange="SOM.handleFile(this.files[0])">
+            <input type="file" id="logo-input" name="logo_file" accept=".ai,.svg,.eps,.pdf,.jpg,.jpeg,.png,.gif,.webp" style="display:none" onchange="SOM.handleFile(this.files[0])">
             <div id="dz-idle">
               <div class="som-dropzone__icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
               <p class="som-dropzone__title">Glissez votre fichier ici</p>
               <p class="som-dropzone__sub">ou <span class="som-link">parcourir</span></p>
-              <div class="som-format-badges"><span class="som-format-badge">.AI</span><span class="som-format-badge">.SVG</span></div>
+              <div class="som-format-badges"><span class="som-format-badge">.AI</span><span class="som-format-badge">.SVG</span><span class="som-format-badge" style="opacity:.5">.PDF</span><span class="som-format-badge" style="opacity:.5">.JPG</span><span class="som-format-badge" style="opacity:.5">.PNG</span></div>
+              <p style="font-size:11px;color:var(--som-dim);margin-top:8px">Vectoriel (.AI .SVG) privilégié — autres formats acceptés</p>
             </div>
             <div id="dz-success" style="display:none">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--som-green)"><polyline points="20 6 9 17 4 12"/></svg>
               <p id="dz-filename" style="font-weight:600;margin:8px 0 4px"></p>
               <button class="som-btn som-btn--ghost som-btn--sm" type="button" onclick="event.stopPropagation();SOM.clearLogo()">Supprimer</button>
             </div>
+          </div>
+          <div id="logo-vecto-warning" style="display:none;align-items:flex-start;gap:12px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);padding:14px 18px;margin-top:16px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--som-gold)" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div style="font-size:13px;color:var(--som-muted);line-height:1.6"><strong style="color:var(--som-text)">Format non vectoriel détecté.</strong> Ce fichier devra possiblement être vectorisé pour l'impression. Des frais de vectorisation peuvent s'appliquer — nous vous confirmerons dans la soumission.</div>
           </div>
           <div class="som-upload-tips">
             <h4>✅ Pour un résultat optimal :</h4>
@@ -202,6 +193,51 @@ get_header(); ?>
                 <p id="ref-filename" style="font-weight:600;font-size:14px"></p>
                 <p style="font-size:12px;color:var(--som-ink-3)">Image de référence ajoutée</p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TYPE DE DÉCORATION -->
+        <div class="som-deco-section som-mt-3">
+          <label class="som-label">Type de décoration <span class="som-required">*</span></label>
+          <div class="som-logo-toggle">
+            <button class="som-logo-toggle__btn active" id="btn-deco-dtf" type="button" onclick="SOM.setDecoMode('dtf')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span><strong>Impression DTF</strong><br><small style="opacity:.7;font-weight:400">Un ou plusieurs emplacements</small></span>
+            </button>
+            <button class="som-logo-toggle__btn" id="btn-deco-patch" type="button" onclick="SOM.setDecoMode('patch')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 20.8 8 13.6 2 9.2h7.6z"/></svg>
+              <span><strong>Patches simili cuir</strong><br><small style="opacity:.7;font-weight:400">Selon la grandeur</small></span>
+            </button>
+          </div>
+
+          <!-- DTF — emplacements multiples -->
+          <div id="deco-dtf-section" class="som-mt-2">
+            <p style="font-size:12px;color:var(--som-dim);margin-bottom:10px">Cochez tous les emplacements souhaités. Minimum 2,00$/impression.</p>
+            <div class="som-placements" id="placement-grid">
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="avant-coeur-petit" data-price="2.00"><span class="som-placement-card__label">Avant — Cœur</span><span class="som-placement-card__size">4" × 2,5"</span><span class="som-placement-card__price">2,00$/article</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="avant-coeur" data-price="2.00"><span class="som-placement-card__label">Avant — Cœur</span><span class="som-placement-card__size">4" × 4"</span><span class="som-placement-card__price">2,00$/article</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="avant-centre-petit" data-price="2.25"><span class="som-placement-card__label">Avant — Centré</span><span class="som-placement-card__size">6" × 6"</span><span class="som-placement-card__price">2,25$/article</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="avant-centre-grand" data-price="7.00"><span class="som-placement-card__label">Avant — Centré</span><span class="som-placement-card__size">11" × 11"</span><span class="som-placement-card__price">7,00$/article</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="avant-centre-max" data-price="11.40"><span class="som-placement-card__label">Avant — Centré</span><span class="som-placement-card__size">14" × 14" (max)</span><span class="som-placement-card__price">11,40$/article</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="arriere-petit" data-price="3.75"><span class="som-placement-card__label">Arrière</span><span class="som-placement-card__size">11" × 6,5"</span><span class="som-placement-card__price">3,75$/article</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="arriere" data-price="6.60"><span class="som-placement-card__label">Arrière</span><span class="som-placement-card__size">11" × 11"</span><span class="som-placement-card__price">6,60$/article</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="arriere-max" data-price="11.40"><span class="som-placement-card__label">Arrière</span><span class="som-placement-card__size">14" × 14" (max)</span><span class="som-placement-card__price">11,40$/article</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="manche-petit" data-price="2.00"><span class="som-placement-card__label">Manche</span><span class="som-placement-card__size">11" × 2"</span><span class="som-placement-card__price">2,00$/article</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="manche-grand" data-price="2.75"><span class="som-placement-card__label">Manche</span><span class="som-placement-card__size">11" × 3,5"</span><span class="som-placement-card__price">2,75$/article</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="autre-dtf" data-price="0"><span class="som-placement-card__label">Autre</span><span class="som-placement-card__size">Sur mesure</span><span class="som-placement-card__price">À confirmer</span></label>
+            </div>
+          </div>
+
+          <!-- PATCH — grandeurs -->
+          <div id="deco-patch-section" class="som-mt-2" style="display:none">
+            <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);padding:12px 16px;margin-bottom:12px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--som-gold)" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div style="font-size:12px;color:var(--som-muted);line-height:1.6"><strong style="color:var(--som-text)">Frais de matrice de découpe : 25$</strong> (unique, par modèle de patch). Minimum 12 patches.</div>
+            </div>
+            <div class="som-placements" id="patch-grid">
+              <label class="som-placement-card"><input type="checkbox" name="patch[]" value="patch-petit" data-price="7.30"><span class="som-placement-card__label">Patch cuir</span><span class="som-placement-card__size">2,25" × 1,85"</span><span class="som-placement-card__price">7,30$/ch · min 12</span></label>
+              <label class="som-placement-card"><input type="checkbox" name="patch[]" value="patch-grand" data-price="13.50"><span class="som-placement-card__label">Patch cuir</span><span class="som-placement-card__size">3" × 2,5"</span><span class="som-placement-card__price">13,50$/ch · min 12</span></label>
             </div>
           </div>
         </div>

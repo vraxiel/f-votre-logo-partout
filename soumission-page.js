@@ -416,8 +416,10 @@
       couleurs: modalProduit.couleurs,
       tailles: modalProduit.tailles || [],
       colorBlocks: [],
-      placement: 'avant-coeur',
-      placementPrice: 2.00,
+      decoMode: 'dtf',
+      placements: [],
+      patches: [],
+      placementPrice: 0,
       logoMode: 'has',
       logoFile: null,
       logoRefFile: null,
@@ -450,13 +452,12 @@
     // Reset logo UI
     resetLogoUI();
 
-    // Reset placements
-    const firstPlacement = document.querySelector('input[name="placement"]');
-    if (firstPlacement) {
-      firstPlacement.checked = true;
-      item.placement = firstPlacement.value;
-      item.placementPrice = parseFloat(firstPlacement.dataset.price) || 0;
-    }
+    // Reset placements & patches — tout décocher
+    document.querySelectorAll('input[name="placement[]"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('input[name="patch[]"]').forEach(cb => cb.checked = false);
+    item.placements = [];
+    item.patches = [];
+    setDecoMode('dtf');
 
     // Premier bloc couleur
     item.colorBlocks = [];
@@ -472,6 +473,13 @@
   }
 
   /* ── Étapes ── */
+  const STEP_TITRES = {
+    1: { titre: 'QUANTITÉS & COULEURS', sub: 'Minimum <strong>12 articles par couleur</strong>. Répartissez les tailles comme vous voulez.' },
+    2: { titre: 'LOGO & EMPLACEMENT', sub: 'Choisissez où imprimer et fournissez votre fichier vectoriel.' },
+    3: { titre: 'VOS COORDONNÉES', sub: 'Pour vous envoyer votre soumission personnalisée.' },
+    4: { titre: 'RÉCAPITULATIF', sub: 'Vérifiez votre commande avant l\'envoi.' },
+  };
+
   function goStep(step) {
     document.querySelectorAll('.som-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + step).classList.add('active');
@@ -480,6 +488,14 @@
       s.classList.toggle('active', n === step);
       s.classList.toggle('done', n < step);
     });
+    // Titre dynamique
+    const titre = STEP_TITRES[step];
+    if (titre) {
+      const titreEl = document.getElementById('som-step-titre');
+      const subEl = document.getElementById('som-step-sub');
+      if (titreEl) titreEl.textContent = titre.titre;
+      if (subEl) subEl.innerHTML = titre.sub;
+    }
     if (step === 4) buildRecap();
     document.getElementById('som-steps').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
@@ -629,14 +645,56 @@
   }
 
   function initPlacements() {
-    document.querySelectorAll('input[name="placement"]').forEach(r => {
-      r.addEventListener('change', () => {
-        if (panierItemEnCours) {
-          panierItemEnCours.placement = r.value;
-          panierItemEnCours.placementPrice = parseFloat(r.dataset.price) || 0;
-        }
+    // DTF emplacements
+    document.querySelectorAll('input[name="placement[]"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (!panierItemEnCours) return;
+        const checked = Array.from(document.querySelectorAll('input[name="placement[]"]:checked'));
+        panierItemEnCours.placements = checked.map(c => ({
+          value: c.value,
+          label: c.closest('.som-placement-card').querySelector('.som-placement-card__label').textContent,
+          size: c.closest('.som-placement-card').querySelector('.som-placement-card__size').textContent,
+          price: parseFloat(c.dataset.price) || 0
+        }));
+        panierItemEnCours.placementPrice = panierItemEnCours.placements.reduce((s, p) => s + p.price, 0);
       });
     });
+    // Patches
+    document.querySelectorAll('input[name="patch[]"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (!panierItemEnCours) return;
+        const checked = Array.from(document.querySelectorAll('input[name="patch[]"]:checked'));
+        panierItemEnCours.patches = checked.map(c => ({
+          value: c.value,
+          label: c.closest('.som-placement-card').querySelector('.som-placement-card__label').textContent,
+          size: c.closest('.som-placement-card').querySelector('.som-placement-card__size').textContent,
+          price: parseFloat(c.dataset.price) || 0
+        }));
+      });
+    });
+  }
+
+  function setDecoMode(mode) {
+    if (panierItemEnCours) panierItemEnCours.decoMode = mode;
+    const btnDtf = document.getElementById('btn-deco-dtf');
+    const btnPatch = document.getElementById('btn-deco-patch');
+    const secDtf = document.getElementById('deco-dtf-section');
+    const secPatch = document.getElementById('deco-patch-section');
+    if (btnDtf) btnDtf.classList.toggle('active', mode === 'dtf');
+    if (btnPatch) btnPatch.classList.toggle('active', mode === 'patch');
+    if (secDtf) secDtf.style.display = mode === 'dtf' ? 'block' : 'none';
+    if (secPatch) secPatch.style.display = mode === 'patch' ? 'block' : 'none';
+    // Vider la sélection de l'autre mode
+    if (panierItemEnCours) {
+      if (mode === 'dtf') {
+        document.querySelectorAll('input[name="patch[]"]').forEach(cb => cb.checked = false);
+        panierItemEnCours.patches = [];
+      } else {
+        document.querySelectorAll('input[name="placement[]"]').forEach(cb => cb.checked = false);
+        panierItemEnCours.placements = [];
+        panierItemEnCours.placementPrice = 0;
+      }
+    }
   }
 
   /* ── Logo ── */
@@ -672,20 +730,28 @@
     if (!file) return;
     const name = file.name.toLowerCase();
     const ext = name.slice(name.lastIndexOf('.'));
-    if (!['.ai', '.svg'].includes(ext)) {
-      showLogoError('Seuls les fichiers .AI et .SVG sont acceptés.');
+    const formatsVectoriels = ['.ai', '.svg', '.eps', '.pdf'];
+    const formatsImage = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    const tousFormats = [...formatsVectoriels, ...formatsImage];
+    if (!tousFormats.includes(ext)) {
+      showLogoError('Format non accepté. Utilisez .AI, .SVG, .PDF, .JPG ou .PNG.');
       document.getElementById('logo-input').value = '';
       return;
     }
+    const estVectoriel = ['.ai', '.svg', '.eps'].includes(ext);
     if (panierItemEnCours) {
       panierItemEnCours.logoFile = file;
       panierItemEnCours.logoName = file.name;
+      panierItemEnCours.logoVectoriel = estVectoriel;
     }
     document.getElementById('dz-idle').style.display = 'none';
     document.getElementById('dz-success').style.display = 'flex';
     document.getElementById('dz-filename').textContent = file.name;
     document.getElementById('dropzone').classList.add('success');
     document.getElementById('btn-next-2').disabled = false;
+    // Avertissement vectorisation si format image
+    const warnEl = document.getElementById('logo-vecto-warning');
+    if (warnEl) warnEl.style.display = estVectoriel ? 'none' : 'flex';
     if (ext === '.svg' || file.type === 'image/svg+xml') {
       const reader = new FileReader();
       reader.onload = e => {
@@ -815,7 +881,7 @@
                   <div class="som-panier-item__meta">
                     <span>${totalQty} articles</span>
                     <span>·</span>
-                    <span>${item.placement}</span>
+                    <span>${(item.placements || []).map(p => p.label).join(', ') || 'Aucun'}</span>
                     <span>·</span>
                     <span>${logoInfo}</span>
                   </div>
@@ -898,7 +964,7 @@
             ${item.image ? `<img src="${item.image}" alt="${item.name}" class="som-recap-produit__img">` : ''}
             <div>
               <strong>${item.name}</strong> <span style="color:#555">(${item.sku})</span>
-              <div style="font-size:12px;color:#666;margin-top:2px">${totalQty} articles · ${item.placement} · Logo : ${logoInfo}</div>
+              <div style="font-size:12px;color:#666;margin-top:2px">${totalQty} articles · ${(item.placements || []).map(p => p.label).join(', ') || 'Aucun emplacement'} · Logo : ${logoInfo}</div>
             </div>
           </div>
           <div style="margin-top:10px">${blocksHtml}</div>
@@ -933,7 +999,7 @@
     if (document.getElementById('h-product-name')) document.getElementById('h-product-name').value = panier.map(i => i.name).join(' | ');
     if (document.getElementById('h-product-sku')) document.getElementById('h-product-sku').value = panier.map(i => i.sku).join(' | ');
     if (document.getElementById('h-color-blocks')) document.getElementById('h-color-blocks').value = JSON.stringify(panierSerialisable);
-    if (document.getElementById('h-placement')) document.getElementById('h-placement').value = panier.map(i => i.placement).join(' | ');
+    if (document.getElementById('h-placement')) document.getElementById('h-placement').value = panier.map(i => (i.placements || []).map(p => p.label).join(', ')).join(' | ');
     if (document.getElementById('h-total-qty')) document.getElementById('h-total-qty').value = grandTotal;
     if (document.getElementById('h-logo-mode')) document.getElementById('h-logo-mode').value = panier.map(i => i.logoMode).join(' | ');
     if (document.getElementById('h-prenom')) document.getElementById('h-prenom').value = document.getElementById('f-prenom').value;
@@ -1024,7 +1090,7 @@
     goPage, setPerPage,
     openModal, openModalIdx, closeModal, selectSwatch, setMainImg, choisirProduit,
     goStep, addColorBlock, removeColorBlock, updateColor, updateQty,
-    setLogoMode, handleFile, handleRefFile, clearLogo, dragOver, dragLeave, dropFile,
+    setLogoMode, setDecoMode, handleFile, handleRefFile, clearLogo, dragOver, dragLeave, dropFile,
     ajouterAuPanier, retirerDuPanier, modifierItem, ajouterAutreProduit, passerAuxCoordonnees,
     retourCatalogue, buildRecap,
     setSearch, clearSearch,
