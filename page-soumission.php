@@ -31,7 +31,7 @@ get_header(); ?>
     <div class="som-container">
       <div class="som-section-header">
         <h2>Nos produits</h2>
-        <p>Minimum <strong>12 articles par couleur</strong>. Plusieurs couleurs possibles par commande.</p>
+        <p>Choisissez vos articles, configurez vos couleurs et tailles.</p>
       </div>
       <div class="som-filters" id="som-filters">
         <button class="som-filter-btn active" data-cat="Vedettes">⭐ Vedettes</button>
@@ -48,7 +48,6 @@ get_header(); ?>
         <button class="som-filter-btn" data-cat="Sacs">🎒 Sacs</button>
         <button class="som-filter-btn" data-cat="Accessoires">🎀 Accessoires</button>
       </div>
-      <!-- Sous-catégories injectées dynamiquement par JS -->
       <div class="som-grid" id="som-grid">
         <div class="som-loading"><div class="som-spinner"></div><p>Chargement des produits…</p></div>
       </div>
@@ -58,23 +57,26 @@ get_header(); ?>
   <section class="som-form-section" id="som-form-section" style="display:none;">
     <div class="som-container">
 
-
-
       <div class="som-steps" id="som-steps">
         <div class="som-step active" data-step="1"><div class="som-step__num">1</div><span>Quantités</span></div>
         <div class="som-step-line"></div>
-        <div class="som-step" data-step="2"><div class="som-step__num">2</div><span>Logo</span></div>
+        <div class="som-step" data-step="2"><div class="som-step__num">2</div><span>Décoration</span></div>
         <div class="som-step-line"></div>
         <div class="som-step" data-step="3"><div class="som-step__num">3</div><span>Coordonnées</span></div>
         <div class="som-step-line"></div>
         <div class="som-step" data-step="4"><div class="som-step__num">4</div><span>Confirmation</span></div>
       </div>
 
-      <!-- ÉTAPE 1 : QUANTITÉS -->
+      <!-- TITRE DYNAMIQUE -->
       <div class="som-panel-title">
         <h2 class="som-panel-titre-h2" id="som-step-titre">QUANTITÉS &amp; COULEURS</h2>
-        <p class="som-panel-titre-sub" id="som-step-sub">Minimum <strong>12 articles par couleur</strong>. Répartissez les tailles comme vous voulez.</p>
+        <p class="som-panel-titre-sub" id="som-step-sub">Choisissez vos couleurs et répartissez les tailles.</p>
       </div>
+
+      <!-- ═══════════════════════════════════
+           ÉTAPE 1 : QUANTITÉS & COULEURS
+           (sans minimum par couleur)
+      ════════════════════════════════════ -->
       <div class="som-panel active" id="panel-1">
         <div class="som-selected-product" id="som-selected-product">
           <div class="som-selected-product__img" id="sel-img"></div>
@@ -83,7 +85,6 @@ get_header(); ?>
             <h3 id="sel-name"></h3>
             <p id="sel-sku"></p>
           </div>
-
         </div>
         <div id="color-blocks-container"></div>
         <button class="som-btn som-btn--add-color" id="btn-add-color" type="button" onclick="SOM.addColorBlock()">
@@ -91,161 +92,54 @@ get_header(); ?>
           Ajouter une autre couleur
         </button>
         <div class="som-qty-summary" id="qty-summary">
-          <div class="som-qty-summary__total">Total : <strong id="grand-total">0</strong> articles</div>
-          <p class="som-qty-summary__msg" id="qty-msg">Ajoutez au moins 12 articles par couleur pour continuer.</p>
+          <div class="som-qty-summary__total">Total : <strong id="grand-total">0</strong> article<span id="grand-total-s"></span></div>
+          <p class="som-qty-summary__msg" id="qty-msg">Ajoutez au moins un article pour continuer.</p>
         </div>
         <div class="som-panel__actions">
           <button class="som-btn som-btn--ghost" onclick="SOM.retourCatalogue()">← Retour au catalogue</button>
-          <button class="som-btn som-btn--primary" id="btn-next-1" type="button" disabled onclick="SOM.goStep(2)">Continuer vers le logo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="som-btn som-btn--primary" id="btn-next-1" type="button" disabled onclick="SOM.goStep(2)">
+            Continuer vers la décoration
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
         </div>
       </div>
 
-      <!-- ÉTAPE 2 : LOGO -->
+      <!-- ═══════════════════════════════════
+           ÉTAPE 2 : DÉCORATION & DESIGNS
+           Minimum 12 impressions par design unique
+      ════════════════════════════════════ -->
       <div class="som-panel" id="panel-2">
         <div class="som-panel__header">
           <span class="som-panel__num">02</span>
-          <div><h2>Votre logo</h2><p>Format vectoriel requis pour une impression de qualité optimale.</p></div>
-        </div>
-        <label class="som-label">Votre logo</label>
-        <div class="som-logo-toggle">
-          <button class="som-logo-toggle__btn active" id="btn-has-logo" type="button" onclick="SOM.setLogoMode('has')">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <span><strong>J'ai mon logo</strong><br><small style="opacity:.7;font-weight:400">Fichier prêt à envoyer</small></span>
-          </button>
-          <button class="som-logo-toggle__btn" id="btn-no-logo" type="button" onclick="SOM.setLogoMode('no')">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-            <span><strong>J'ai besoin d'un designer</strong><br><small style="opacity:.7;font-weight:400">On crée votre logo</small></span>
-          </button>
+          <div><h2>Décoration &amp; Logo</h2><p>Chaque design unique nécessite un minimum de <strong>12 impressions</strong> (toutes positions confondues).</p></div>
         </div>
 
-        <!-- Mode : a un logo -->
-        <div id="logo-upload-section">
-          <div class="som-dropzone" id="dropzone" ondragover="SOM.dragOver(event)" ondragleave="SOM.dragLeave(event)" ondrop="SOM.dropFile(event)" onclick="document.getElementById('logo-input').click()">
-            <input type="file" id="logo-input" name="logo_file" accept=".ai,.svg,.eps,.pdf,.jpg,.jpeg,.png,.gif,.webp" style="display:none" onchange="SOM.handleFile(this.files[0])">
-            <div id="dz-idle">
-              <div class="som-dropzone__icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-              <p class="som-dropzone__title">Glissez votre fichier ici</p>
-              <p class="som-dropzone__sub">ou <span class="som-link">parcourir</span></p>
-              <div class="som-format-badges"><span class="som-format-badge">.AI</span><span class="som-format-badge">.SVG</span><span class="som-format-badge" style="opacity:.5">.PDF</span><span class="som-format-badge" style="opacity:.5">.JPG</span><span class="som-format-badge" style="opacity:.5">.PNG</span></div>
-              <p style="font-size:11px;color:var(--som-dim);margin-top:8px">Vectoriel (.AI .SVG) privilégié — autres formats acceptés</p>
-            </div>
-            <div id="dz-success" style="display:none">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--som-green)"><polyline points="20 6 9 17 4 12"/></svg>
-              <p id="dz-filename" style="font-weight:600;margin:8px 0 4px"></p>
-              <button class="som-btn som-btn--ghost som-btn--sm" type="button" onclick="event.stopPropagation();SOM.clearLogo()">Supprimer</button>
-            </div>
-          </div>
-          <div id="logo-vecto-warning" style="display:none;align-items:flex-start;gap:12px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);padding:14px 18px;margin-top:16px">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--som-gold)" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <div style="font-size:13px;color:var(--som-muted);line-height:1.6"><strong style="color:var(--som-text)">Format non vectoriel détecté.</strong> Ce fichier devra possiblement être vectorisé pour l'impression. Des frais de vectorisation peuvent s'appliquer — nous vous confirmerons dans la soumission.</div>
-          </div>
-          <div class="som-upload-tips">
-            <h4>✅ Pour un résultat optimal :</h4>
-            <ul>
-              <li>Fichier <strong>vectoriel</strong> — pas d'image embarquée (JPG/PNG)</li>
-              <li>Polices <strong>converties en tracés</strong> (contours)</li>
-              <li>Couleurs en mode <strong>RVB</strong></li>
-              <li>Pour .AI : enregistrer en <strong>Illustrator 2020 ou antérieur</strong></li>
-              <li>Grandeur max d'impression : <strong>13 pouces</strong></li>
-            </ul>
-          </div>
-          <div id="svg-preview-box" style="display:none"><p class="som-label">Aperçu :</p><div id="svg-preview" class="som-svg-preview"></div></div>
-          <div class="som-field-group som-mt-2">
-            <label class="som-label" for="logo-notes">Notes sur le logo <span class="som-optional">(optionnel)</span></label>
-            <textarea class="som-textarea" id="logo-notes" name="logo_notes" rows="3" placeholder="Couleurs préférées, variante à utiliser, contraintes particulières…"></textarea>
+        <div class="som-deco-info-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong>Comment fonctionne le minimum de 12 ?</strong>
+            <p>Le minimum de 12 s'applique par <em>design unique</em> (étiquette), pas par vêtement. Si vous avez 6 articles et souhaitez ce design en avant ET en arrière, cela donne 6 × 2 = <strong>12 impressions</strong> — le minimum est atteint avec un seul design.</p>
           </div>
         </div>
 
-        <!-- Mode : pas de logo vectoriel -->
-        <div id="logo-designer-section" style="display:none">
-          <div class="som-designer-alert">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <div>
-              <strong>Service de design disponible</strong>
-              <p>Notre designer peut créer votre fichier vectoriel. Des frais supplémentaires s'appliquent et le délai de livraison sera plus long. Nous vous confirmerons les détails dans la soumission.</p>
-            </div>
-          </div>
-          <div class="som-field-group">
-            <label class="som-label" for="logo-description">Décrivez votre logo <span class="som-required">*</span></label>
-            <textarea class="som-textarea" id="logo-description" name="logo_description" rows="4" placeholder="Décrivez votre logo : texte, formes, couleurs, style souhaité… Plus vous êtes précis, mieux c'est!"></textarea>
-          </div>
-          <!-- Upload image de référence -->
-          <div class="som-field-group som-mt-2">
-            <label class="som-label">Image de référence <span class="som-optional">(optionnel mais recommandé)</span></label>
-            <p style="font-size:13px;color:var(--som-ink-3);margin-bottom:8px">Déposez une image existante de votre logo (JPG, PNG, PDF…) pour aider notre designer.</p>
-            <div class="som-ref-upload" onclick="document.getElementById('logo-ref-input').click()">
-              <input type="file" id="logo-ref-input" name="logo_ref_file"
-                     accept=".jpg,.jpeg,.png,.pdf,.gif,.bmp,.webp"
-                     style="display:none" onchange="SOM.handleRefFile(this.files[0])">
-              <div id="ref-idle">
-                <div style="font-size:28px;margin-bottom:8px">🖼️</div>
-                <p class="som-ref-upload__title">Glissez ou cliquez pour ajouter une image de référence</p>
-                <p class="som-ref-upload__sub">Ce fichier servira de référence seulement — pas pour l'impression</p>
-                <div class="som-ref-formats">
-                  <span class="som-ref-format">JPG</span>
-                  <span class="som-ref-format">PNG</span>
-                  <span class="som-ref-format">PDF</span>
-                  <span class="som-ref-format">GIF</span>
-                </div>
-              </div>
-              <div id="ref-success">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--som-green)"><polyline points="20 6 9 17 4 12"/></svg>
-                <p id="ref-filename" style="font-weight:600;font-size:14px"></p>
-                <p style="font-size:12px;color:var(--som-ink-3)">Image de référence ajoutée</p>
-              </div>
-            </div>
+        <!-- Conteneur des designs — rempli dynamiquement par JS -->
+        <div id="som-designs-container">
+          <div class="som-deco-empty">
+            <p>Aucun design ajouté. Cliquez sur <strong>+ Ajouter un design</strong> pour commencer.</p>
           </div>
         </div>
 
-        <!-- TYPE DE DÉCORATION -->
-        <div class="som-deco-section som-mt-3">
-          <label class="som-label">Type de décoration <span class="som-required">*</span></label>
-          <div class="som-logo-toggle">
-            <button class="som-logo-toggle__btn active" id="btn-deco-dtf" type="button" onclick="SOM.setDecoMode('dtf')">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <span><strong>Impression DTF</strong><br><small style="opacity:.7;font-weight:400">Un ou plusieurs emplacements</small></span>
-            </button>
-            <button class="som-logo-toggle__btn" id="btn-deco-patch" type="button" onclick="SOM.setDecoMode('patch')">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 20.8 8 13.6 2 9.2h7.6z"/></svg>
-              <span><strong>Patches simili cuir</strong><br><small style="opacity:.7;font-weight:400">Selon la grandeur</small></span>
-            </button>
-          </div>
+        <button class="som-btn som-btn--add-color" type="button" onclick="SOM.addDesign()" style="margin-top:12px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ajouter un design
+        </button>
 
-          <!-- DTF — emplacements multiples -->
-          <div id="deco-dtf-section" class="som-mt-2">
-            <p style="font-size:12px;color:var(--som-dim);margin-bottom:10px">Cochez tous les emplacements souhaités. Minimum 2,00$/impression.</p>
-            <div class="som-placements" id="placement-grid">
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="avant-coeur-petit" data-price="2.00"><span class="som-placement-card__label">Avant — Cœur</span><span class="som-placement-card__size">4" × 2,5"</span><span class="som-placement-card__price">2,00$/article</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="avant-coeur" data-price="2.00"><span class="som-placement-card__label">Avant — Cœur</span><span class="som-placement-card__size">4" × 4"</span><span class="som-placement-card__price">2,00$/article</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="avant-centre-petit" data-price="2.25"><span class="som-placement-card__label">Avant — Centré</span><span class="som-placement-card__size">6" × 6"</span><span class="som-placement-card__price">2,25$/article</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="avant-centre-grand" data-price="7.00"><span class="som-placement-card__label">Avant — Centré</span><span class="som-placement-card__size">11" × 11"</span><span class="som-placement-card__price">7,00$/article</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="avant-centre-max" data-price="11.40"><span class="som-placement-card__label">Avant — Centré</span><span class="som-placement-card__size">14" × 14" (max)</span><span class="som-placement-card__price">11,40$/article</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="arriere-petit" data-price="3.75"><span class="som-placement-card__label">Arrière</span><span class="som-placement-card__size">11" × 6,5"</span><span class="som-placement-card__price">3,75$/article</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="arriere" data-price="6.60"><span class="som-placement-card__label">Arrière</span><span class="som-placement-card__size">11" × 11"</span><span class="som-placement-card__price">6,60$/article</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="arriere-max" data-price="11.40"><span class="som-placement-card__label">Arrière</span><span class="som-placement-card__size">14" × 14" (max)</span><span class="som-placement-card__price">11,40$/article</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="manche-petit" data-price="2.00"><span class="som-placement-card__label">Manche</span><span class="som-placement-card__size">11" × 2"</span><span class="som-placement-card__price">2,00$/article</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="manche-grand" data-price="2.75"><span class="som-placement-card__label">Manche</span><span class="som-placement-card__size">11" × 3,5"</span><span class="som-placement-card__price">2,75$/article</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="placement[]" value="autre-dtf" data-price="0"><span class="som-placement-card__label">Autre</span><span class="som-placement-card__size">Sur mesure</span><span class="som-placement-card__price">À confirmer</span></label>
-            </div>
-          </div>
-
-          <!-- PATCH — grandeurs -->
-          <div id="deco-patch-section" class="som-mt-2" style="display:none">
-            <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);padding:12px 16px;margin-bottom:12px">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--som-gold)" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div style="font-size:12px;color:var(--som-muted);line-height:1.6"><strong style="color:var(--som-text)">Frais de matrice de découpe : 25$</strong> (unique, par modèle de patch). Minimum 12 patches.</div>
-            </div>
-            <div class="som-placements" id="patch-grid">
-              <label class="som-placement-card"><input type="checkbox" name="patch[]" value="patch-petit" data-price="7.30"><span class="som-placement-card__label">Patch cuir</span><span class="som-placement-card__size">2,25" × 1,85"</span><span class="som-placement-card__price">7,30$/ch · min 12</span></label>
-              <label class="som-placement-card"><input type="checkbox" name="patch[]" value="patch-grand" data-price="13.50"><span class="som-placement-card__label">Patch cuir</span><span class="som-placement-card__size">3" × 2,5"</span><span class="som-placement-card__price">13,50$/ch · min 12</span></label>
-            </div>
-          </div>
-        </div>
-
-        <div id="logo-error" class="som-error" style="display:none"></div>
         <div class="som-panel__actions">
           <button class="som-btn som-btn--ghost" type="button" onclick="SOM.goStep(1)">← Retour</button>
-          <button class="som-btn som-btn--primary" id="btn-next-2" type="button" disabled onclick="SOM.ajouterAuPanier()">Ajouter au panier <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="som-btn som-btn--primary" id="btn-next-2" type="button" disabled onclick="SOM.ajouterAuPanier()">
+            Ajouter au panier
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
         </div>
       </div>
 
@@ -274,7 +168,10 @@ get_header(); ?>
         </div>
         <div class="som-panel__actions">
           <button class="som-btn som-btn--ghost" type="button" onclick="SOM.goStep(2)">← Retour</button>
-          <button class="som-btn som-btn--primary" id="btn-next-3" type="button" onclick="SOM.goStep(4)">Voir le récapitulatif <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="som-btn som-btn--primary" id="btn-next-3" type="button" onclick="SOM.goStep(4)">
+            Voir le récapitulatif
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
         </div>
       </div>
 
@@ -302,8 +199,6 @@ get_header(); ?>
           <input type="hidden" name="pref_contact" id="h-pref-contact">
           <input type="hidden" name="meilleur_moment" id="h-moment">
           <input type="hidden" name="message" id="h-message">
-          <input type="hidden" name="logo_notes" id="h-logo-notes">
-          <input type="hidden" name="logo_description" id="h-logo-description">
           <div class="som-panel__actions">
             <button class="som-btn som-btn--ghost" type="button" onclick="SOM.goStep(3)">← Retour</button>
             <button class="som-btn som-btn--submit" type="submit" id="btn-submit">
