@@ -1,12 +1,14 @@
 /**
- * soumission-page.js — F Votre Logo Partout v4
- * Architecture panier — multi-produits, logo & emplacement par produit
+ * soumission-page.js — F Votre Logo Partout v5
+ * - Panel 1 : plus de minimum par couleur, juste comptage informatif
+ * - Panel 2 : logique décoration — minimum 12 impressions par design unique
+ *             (positions cumulées : avant + arrière d'un même design = 1 étiquette)
  */
 (function () {
   'use strict';
 
   const AJAX = window.soumissionData?.ajaxUrl || '/wp-admin/admin-ajax.php';
-  const MIN_PER_COLOR = 12;
+  const MIN_IMPRESSIONS = 12; // minimum par design unique (étiquette)
   const SIZES = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
 
   const COLOR_MAP = {
@@ -75,10 +77,9 @@
   let searchQuery = '';
   let modalProduit = null;
 
-  // Panier : tableau de produits configurés
-  // Chaque item : { id, idx, name, sku, image, couleurs, colorBlocks, placement, placementPrice, logoMode, logoFile, logoRefFile, logoName }
+  // Panier
   const panier = [];
-  let panierItemEnCours = null; // item en cours de configuration
+  let panierItemEnCours = null;
 
   /* ══════════════════════════════════════
      CATALOGUE
@@ -98,7 +99,6 @@
     const filtersEl = document.getElementById('som-filters');
     if (!filtersEl) return;
 
-    // Injecter la barre de recherche au-dessus des filtres si pas déjà là
     if (!document.getElementById('som-search-bar')) {
       const searchBar = document.createElement('div');
       searchBar.id = 'som-search-bar';
@@ -154,7 +154,6 @@
   }
 
   function filterProducts(catLabel, sousCatLabel) {
-    // Recherche globale — ignore catégorie/sous-cat
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       return allProducts.filter(p =>
@@ -212,7 +211,6 @@
         return `<span class="som-swatch" title="${c.nom}" style="background:#f5f5f5;overflow:hidden;display:inline-block;">${img ? `<img src="${img}" alt="${c.nom}" style="width:100%;height:100%;object-fit:cover;">` : ''}</span>`;
       }).join('') + ((p.couleurs || []).length > 8 ? `<span class="som-swatch-more">+${(p.couleurs || []).length - 8}</span>` : '');
       const idx = allProducts.indexOf(p);
-      // Badge "Déjà dans le panier"
       const dejaDans = panier.some(item => item.idx === idx);
       return `
         <div class="som-card${!dispo ? ' som-card--out' : ''}" style="cursor:pointer;" onclick='SOM.openModalIdx(${idx})'>
@@ -406,7 +404,6 @@
     const couleurObj = selectedColor ? modalProduit.couleurs.find(c => c.nom === selectedColor) : null;
     const imgSrc = couleurObj?.images?.[0] || modalProduit.image;
 
-    // Créer un nouvel item panier
     panierItemEnCours = {
       id: 'item-' + Date.now(),
       idx: modalProduit.idx,
@@ -416,10 +413,10 @@
       couleurs: modalProduit.couleurs,
       tailles: modalProduit.tailles || [],
       colorBlocks: [],
-      decoMode: 'dtf',
-      placements: [],
-      patches: [],
-      placementPrice: 0,
+      // Décoration — tableau de designs uniques
+      // Chaque design : { id, logoFile, logoName, logoVectoriel, positions[], notes }
+      // positions[] : tableau de valeurs de placement cochées
+      designs: [],
       logoMode: 'has',
       logoFile: null,
       logoRefFile: null,
@@ -432,7 +429,7 @@
   }
 
   /* ══════════════════════════════════════
-     CONFIGURATION D'UN PRODUIT (étapes 1-3)
+     CONFIGURATION D'UN PRODUIT
   ══════════════════════════════════════ */
 
   function ouvrirConfigProduit(selectedColor) {
@@ -443,26 +440,15 @@
     formSection.style.display = 'block';
     formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Header produit sélectionné
     document.getElementById('sel-name').textContent = item.name;
     document.getElementById('sel-sku').textContent = 'SKU : ' + item.sku;
     const imgEl = document.getElementById('sel-img');
     imgEl.innerHTML = item.image ? `<img src="${item.image}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;">` : '';
 
-    // Reset logo UI
     resetLogoUI();
-
-    // Reset placements & patches — tout décocher
-    document.querySelectorAll('input[name="placement[]"]').forEach(cb => cb.checked = false);
-    document.querySelectorAll('input[name="patch[]"]').forEach(cb => cb.checked = false);
-    item.placements = [];
-    item.patches = [];
-    setDecoMode('dtf');
-
-    // Premier bloc couleur
     item.colorBlocks = [];
+    item.designs = [];
     addColorBlock(selectedColor);
-
     goStep(1);
   }
 
@@ -474,8 +460,8 @@
 
   /* ── Étapes ── */
   const STEP_TITRES = {
-    1: { titre: 'QUANTITÉS & COULEURS', sub: 'Minimum <strong>12 articles par couleur</strong>. Répartissez les tailles comme vous voulez.' },
-    2: { titre: 'LOGO & EMPLACEMENT', sub: 'Choisissez où imprimer et fournissez votre fichier vectoriel.' },
+    1: { titre: 'QUANTITÉS & COULEURS', sub: 'Choisissez vos couleurs et répartissez les tailles.' },
+    2: { titre: 'DÉCORATION & LOGO', sub: 'Chaque design unique nécessite un minimum de <strong>12 impressions</strong> (toutes positions confondues).' },
     3: { titre: 'VOS COORDONNÉES', sub: 'Pour vous envoyer votre soumission personnalisée.' },
     4: { titre: 'RÉCAPITULATIF', sub: 'Vérifiez votre commande avant l\'envoi.' },
   };
@@ -488,7 +474,6 @@
       s.classList.toggle('active', n === step);
       s.classList.toggle('done', n < step);
     });
-    // Titre dynamique
     const titre = STEP_TITRES[step];
     if (titre) {
       const titreEl = document.getElementById('som-step-titre');
@@ -496,15 +481,17 @@
       if (titreEl) titreEl.textContent = titre.titre;
       if (subEl) subEl.innerHTML = titre.sub;
     }
+    if (step === 2) renderDesigns();
     if (step === 4) buildRecap();
     document.getElementById('som-steps').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
-  /* ── Blocs couleur ── */
-  /* ── Tailles d'un produit ── */
+  /* ══════════════════════════════════════
+     PANEL 1 — BLOCS COULEUR (sans minimum)
+  ══════════════════════════════════════ */
+
   function getTaillesProduit(item, selectedColor) {
     const OS_LABELS = ['os','one size','osfm','adjustable','taille unique','one-size'];
-
     function labelsFromTailles(tailles) {
       if (!tailles || tailles.length === 0) return [];
       return tailles
@@ -515,19 +502,13 @@
         })
         .filter(l => l.length > 0);
     }
-
-    // Priorité 1 : tailles de la couleur sélectionnée
     if (selectedColor) {
       const couleurData = (item.couleurs || []).find(c => c.nom === selectedColor);
       const labels = labelsFromTailles(couleurData?.tailles);
       if (labels.length > 0) return labels;
     }
-
-    // Priorité 2 : tailles globales du produit
     const labels = labelsFromTailles(item.tailles);
     if (labels.length > 0) return labels;
-
-    // Fallback : tailles standard
     return SIZES;
   }
 
@@ -569,18 +550,16 @@
                  oninput="SOM.updateQty('${block.id}','${size}',this.value)">
         </div>`).join('');
       const blockTotal = Object.values(block.quantities).reduce((a, b) => a + b, 0);
-      const ok = blockTotal >= MIN_PER_COLOR;
       const hex = COLOR_MAP[(block.color || '').toLowerCase().replace(/\s+/g, '-')] || '#ccc';
       return `
-        <div class="som-color-block${ok ? ' som-color-block--ok' : ''}" id="block-${block.id}">
+        <div class="som-color-block" id="block-${block.id}">
           <div class="som-color-block__header">
             <div class="som-color-block__color-select">
               <div class="som-color-preview" id="preview-${block.id}" style="background:${hex}"></div>
               <select class="som-input som-input--color" onchange="SOM.updateColor('${block.id}',this)">${colorOptions}</select>
             </div>
             <div class="som-color-block__total">
-              <span id="block-total-${block.id}" class="${ok ? 'ok' : ''}">${blockTotal}</span> articles
-              <span id="min-badge-${block.id}">${ok ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--som-green)"><polyline points="20 6 9 17 4 12"/></svg>' : '<span style="color:#cc4444;font-size:12px">min. 12</span>'}</span>
+              <span id="block-total-${block.id}">${blockTotal}</span> articles
             </div>
             ${item.colorBlocks.length > 1 ? `<button class="som-btn-remove" type="button" onclick="SOM.removeColorBlock('${block.id}')" title="Supprimer">×</button>` : ''}
           </div>
@@ -610,192 +589,350 @@
     if (!block) return;
     block.quantities[size] = Math.max(0, parseInt(val) || 0);
     const blockTotal = Object.values(block.quantities).reduce((a, b) => a + b, 0);
-    const ok = blockTotal >= MIN_PER_COLOR;
     const totalEl = document.getElementById('block-total-' + blockId);
-    if (totalEl) { totalEl.textContent = blockTotal; totalEl.className = ok ? 'ok' : ''; }
-    const blockEl = document.getElementById('block-' + blockId);
-    if (blockEl) blockEl.classList.toggle('som-color-block--ok', ok);
-    // Mettre à jour le badge min. 12 / checkmark
-    const minBadge = document.getElementById('min-badge-' + blockId);
-    if (minBadge) {
-      minBadge.innerHTML = ok
-        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--som-green)"><polyline points="20 6 9 17 4 12"/></svg>'
-        : '<span style="color:#cc4444;font-size:12px">min. 12</span>';
-    }
+    if (totalEl) totalEl.textContent = blockTotal;
     updateQtySummary();
   }
 
+  function getTotalPieces() {
+    if (!panierItemEnCours) return 0;
+    return panierItemEnCours.colorBlocks.reduce(
+      (sum, b) => sum + Object.values(b.quantities).reduce((a, c) => a + c, 0), 0
+    );
+  }
+
   function updateQtySummary() {
-    const item = panierItemEnCours;
-    if (!item) return;
-    const grandTotal = item.colorBlocks.reduce((sum, b) => sum + Object.values(b.quantities).reduce((a, c) => a + c, 0), 0);
-    const allOk = item.colorBlocks.length > 0 && item.colorBlocks.every(b => Object.values(b.quantities).reduce((a, c) => a + c, 0) >= MIN_PER_COLOR);
-    document.getElementById('grand-total').textContent = grandTotal;
-    const msg = document.getElementById('qty-msg');
+    const total = getTotalPieces();
+    document.getElementById('grand-total').textContent = total;
+    // Le bouton continuer est actif dès qu'il y a au moins 1 article
     const btn = document.getElementById('btn-next-1');
-    if (allOk) {
-      msg.textContent = '✓ Toutes les couleurs atteignent le minimum de 12 articles.';
-      msg.className = 'som-qty-summary__msg ok';
-      btn.disabled = false;
-    } else {
-      msg.textContent = 'Chaque couleur doit avoir au moins 12 articles.';
-      msg.className = 'som-qty-summary__msg';
-      btn.disabled = true;
-    }
-  }
-
-  function initPlacements() {
-    // DTF emplacements
-    document.querySelectorAll('input[name="placement[]"]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        if (!panierItemEnCours) return;
-        const checked = Array.from(document.querySelectorAll('input[name="placement[]"]:checked'));
-        panierItemEnCours.placements = checked.map(c => ({
-          value: c.value,
-          label: c.closest('.som-placement-card').querySelector('.som-placement-card__label').textContent,
-          size: c.closest('.som-placement-card').querySelector('.som-placement-card__size').textContent,
-          price: parseFloat(c.dataset.price) || 0
-        }));
-        panierItemEnCours.placementPrice = panierItemEnCours.placements.reduce((s, p) => s + p.price, 0);
-      });
-    });
-    // Patches
-    document.querySelectorAll('input[name="patch[]"]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        if (!panierItemEnCours) return;
-        const checked = Array.from(document.querySelectorAll('input[name="patch[]"]:checked'));
-        panierItemEnCours.patches = checked.map(c => ({
-          value: c.value,
-          label: c.closest('.som-placement-card').querySelector('.som-placement-card__label').textContent,
-          size: c.closest('.som-placement-card').querySelector('.som-placement-card__size').textContent,
-          price: parseFloat(c.dataset.price) || 0
-        }));
-      });
-    });
-  }
-
-  function setDecoMode(mode) {
-    if (panierItemEnCours) panierItemEnCours.decoMode = mode;
-    const btnDtf = document.getElementById('btn-deco-dtf');
-    const btnPatch = document.getElementById('btn-deco-patch');
-    const secDtf = document.getElementById('deco-dtf-section');
-    const secPatch = document.getElementById('deco-patch-section');
-    if (btnDtf) btnDtf.classList.toggle('active', mode === 'dtf');
-    if (btnPatch) btnPatch.classList.toggle('active', mode === 'patch');
-    if (secDtf) secDtf.style.display = mode === 'dtf' ? 'block' : 'none';
-    if (secPatch) secPatch.style.display = mode === 'patch' ? 'block' : 'none';
-    // Vider la sélection de l'autre mode
-    if (panierItemEnCours) {
-      if (mode === 'dtf') {
-        document.querySelectorAll('input[name="patch[]"]').forEach(cb => cb.checked = false);
-        panierItemEnCours.patches = [];
+    if (btn) btn.disabled = total < 1;
+    const msg = document.getElementById('qty-msg');
+    if (msg) {
+      if (total > 0) {
+        msg.textContent = `✓ ${total} article${total > 1 ? 's' : ''} sélectionné${total > 1 ? 's' : ''}.`;
+        msg.className = 'som-qty-summary__msg ok';
       } else {
-        document.querySelectorAll('input[name="placement[]"]').forEach(cb => cb.checked = false);
-        panierItemEnCours.placements = [];
-        panierItemEnCours.placementPrice = 0;
+        msg.textContent = 'Ajoutez au moins un article pour continuer.';
+        msg.className = 'som-qty-summary__msg';
       }
     }
   }
 
-  /* ── Logo ── */
+  /* ══════════════════════════════════════
+     PANEL 2 — DESIGNS & DÉCORATION
+     Logique : 12 impressions par design unique
+     (toutes positions d'un même design s'additionnent)
+  ══════════════════════════════════════ */
+
+  // Définition des emplacements disponibles
+  const PLACEMENTS_DTF = [
+    { value: 'avant-coeur-petit',   label: 'Avant — Cœur',     size: '4" × 2,5"',   price: 2.00 },
+    { value: 'avant-coeur',         label: 'Avant — Cœur',     size: '4" × 4"',     price: 2.00 },
+    { value: 'avant-centre-petit',  label: 'Avant — Centré',   size: '6" × 6"',     price: 2.25 },
+    { value: 'avant-centre-grand',  label: 'Avant — Centré',   size: '11" × 11"',   price: 7.00 },
+    { value: 'avant-centre-max',    label: 'Avant — Centré',   size: '14" × 14"',   price: 11.40 },
+    { value: 'arriere-petit',       label: 'Arrière',           size: '11" × 6,5"',  price: 3.75 },
+    { value: 'arriere',             label: 'Arrière',           size: '11" × 11"',   price: 6.60 },
+    { value: 'arriere-max',         label: 'Arrière',           size: '14" × 14"',   price: 11.40 },
+    { value: 'manche-petit',        label: 'Manche',            size: '11" × 2"',    price: 2.00 },
+    { value: 'manche-grand',        label: 'Manche',            size: '11" × 3,5"',  price: 2.75 },
+    { value: 'autre-dtf',           label: 'Autre',             size: 'Sur mesure',  price: 0 },
+  ];
+
+  const PLACEMENTS_PATCH = [
+    { value: 'patch-petit', label: 'Patch cuir', size: '2,25" × 1,85"', price: 7.30 },
+    { value: 'patch-grand', label: 'Patch cuir', size: '3" × 2,5"',     price: 13.50 },
+  ];
+
+  function getImpressionsParDesign(design) {
+    // Nombre total de pièces commandées
+    const totalPieces = getTotalPieces();
+    // Chaque position cochée = totalPieces impressions de ce design
+    return (design.positions || []).length * totalPieces;
+  }
+
+  function addDesign() {
+    if (!panierItemEnCours) return;
+    const design = {
+      id: 'design-' + Date.now(),
+      type: 'dtf', // 'dtf' ou 'patch'
+      positions: [],
+      logoFile: null,
+      logoName: '',
+      logoVectoriel: false,
+      logoRefFile: null,
+      notes: '',
+    };
+    panierItemEnCours.designs.push(design);
+    renderDesigns();
+  }
+
+  function removeDesign(designId) {
+    if (!panierItemEnCours) return;
+    panierItemEnCours.designs = panierItemEnCours.designs.filter(d => d.id !== designId);
+    renderDesigns();
+    updateDecoValidation();
+  }
+
+  function updateDesignType(designId, type) {
+    if (!panierItemEnCours) return;
+    const design = panierItemEnCours.designs.find(d => d.id === designId);
+    if (!design) return;
+    design.type = type;
+    design.positions = []; // reset positions quand on change de type
+    renderDesigns();
+    updateDecoValidation();
+  }
+
+  function togglePosition(designId, posValue) {
+    if (!panierItemEnCours) return;
+    const design = panierItemEnCours.designs.find(d => d.id === designId);
+    if (!design) return;
+    const idx = design.positions.indexOf(posValue);
+    if (idx >= 0) {
+      design.positions.splice(idx, 1);
+    } else {
+      design.positions.push(posValue);
+    }
+    // Mettre à jour le compteur de ce design sans re-render complet
+    updateDesignCounter(design);
+    updateDecoValidation();
+  }
+
+  function updateDesignCounter(design) {
+    const impressions = getImpressionsParDesign(design);
+    const counterEl = document.getElementById('deco-counter-' + design.id);
+    if (!counterEl) return;
+    const ok = impressions >= MIN_IMPRESSIONS;
+    counterEl.textContent = impressions + ' impression' + (impressions > 1 ? 's' : '');
+    counterEl.className = 'som-deco-counter' + (ok ? ' ok' : impressions > 0 ? ' warn' : '');
+    // Mettre à jour le badge statut
+    const statusEl = document.getElementById('deco-status-' + design.id);
+    if (statusEl) {
+      if (impressions === 0) {
+        statusEl.innerHTML = '<span style="color:var(--som-dim);font-size:12px">Aucune position sélectionnée</span>';
+      } else if (ok) {
+        statusEl.innerHTML = `<span style="color:var(--som-green2);font-size:12px">✓ Minimum atteint (${impressions}/${MIN_IMPRESSIONS})</span>`;
+      } else {
+        statusEl.innerHTML = `<span style="color:var(--som-red2);font-size:12px">⚠ ${impressions}/${MIN_IMPRESSIONS} impressions — ajoutez des positions ou des articles</span>`;
+      }
+    }
+  }
+
+  function renderDesigns() {
+    const container = document.getElementById('som-designs-container');
+    if (!container || !panierItemEnCours) return;
+    const totalPieces = getTotalPieces();
+
+    if (panierItemEnCours.designs.length === 0) {
+      container.innerHTML = `
+        <div class="som-deco-empty">
+          <p>Aucun design ajouté. Cliquez sur <strong>+ Ajouter un design</strong> pour commencer.</p>
+        </div>`;
+      updateDecoValidation();
+      return;
+    }
+
+    container.innerHTML = panierItemEnCours.designs.map((design, idx) => {
+      const placements = design.type === 'patch' ? PLACEMENTS_PATCH : PLACEMENTS_DTF;
+      const impressions = getImpressionsParDesign(design);
+      const ok = impressions >= MIN_IMPRESSIONS;
+
+      const positionsHtml = placements.map(p => {
+        const checked = design.positions.includes(p.value);
+        return `
+          <label class="som-placement-card${checked ? ' som-placement-card--checked' : ''}">
+            <input type="checkbox" ${checked ? 'checked' : ''}
+              onchange="SOM.togglePosition('${design.id}','${p.value}')">
+            <span class="som-placement-card__label">${p.label}</span>
+            <span class="som-placement-card__size">${p.size}</span>
+            ${p.price > 0 ? `<span class="som-placement-card__price">${p.price.toFixed(2)}$/article</span>` : '<span class="som-placement-card__price">À confirmer</span>'}
+          </label>`;
+      }).join('');
+
+      const logoHtml = buildLogoUploadHtml(design);
+
+      return `
+        <div class="som-design-block${ok ? ' som-design-block--ok' : ''}" id="design-${design.id}">
+          <div class="som-design-block__header">
+            <div class="som-design-block__num">Design ${idx + 1}</div>
+            <div class="som-deco-counter-wrap">
+              <span id="deco-counter-${design.id}" class="som-deco-counter${ok ? ' ok' : impressions > 0 ? ' warn' : ''}">
+                ${impressions} impression${impressions > 1 ? 's' : ''}
+              </span>
+              <span style="font-size:11px;color:var(--som-dim)">/ ${MIN_IMPRESSIONS} min.</span>
+            </div>
+            ${panierItemEnCours.designs.length > 1
+              ? `<button class="som-btn-remove" type="button" onclick="SOM.removeDesign('${design.id}')" title="Supprimer ce design">×</button>`
+              : ''}
+          </div>
+
+          <div id="deco-status-${design.id}" style="padding:0 0 10px 0;font-size:12px">
+            ${impressions === 0
+              ? '<span style="color:var(--som-dim)">Aucune position sélectionnée</span>'
+              : ok
+                ? `<span style="color:var(--som-green2)">✓ Minimum atteint (${impressions}/${MIN_IMPRESSIONS})</span>`
+                : `<span style="color:var(--som-red2)">⚠ ${impressions}/${MIN_IMPRESSIONS} impressions — ajoutez des positions ou des articles</span>`}
+          </div>
+
+          <div class="som-deco-explication">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>Ce design sera imprimé <strong>${totalPieces} fois</strong> (une fois par article). Chaque position cochée multiplie les impressions : ${totalPieces} articles × ${design.positions.length} position${design.positions.length !== 1 ? 's' : ''} = <strong>${impressions} impressions</strong>.</span>
+          </div>
+
+          <label class="som-label" style="margin-top:14px">Type de décoration</label>
+          <div class="som-logo-toggle" style="margin-bottom:14px">
+            <button class="som-logo-toggle__btn${design.type === 'dtf' ? ' active' : ''}" type="button"
+              onclick="SOM.updateDesignType('${design.id}','dtf')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span><strong>Impression DTF</strong></span>
+            </button>
+            <button class="som-logo-toggle__btn${design.type === 'patch' ? ' active' : ''}" type="button"
+              onclick="SOM.updateDesignType('${design.id}','patch')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 20.8 8 13.6 2 9.2h7.6z"/></svg>
+              <span><strong>Patch simili cuir</strong></span>
+            </button>
+          </div>
+
+          ${design.type === 'patch' ? `
+            <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);padding:12px 16px;margin-bottom:12px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--som-gold)" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span style="font-size:12px;color:var(--som-muted)"><strong style="color:var(--som-text)">Frais de matrice : 25$</strong> (unique, par modèle de patch)</span>
+            </div>` : ''}
+
+          <label class="som-label">Emplacements pour ce design</label>
+          <p style="font-size:12px;color:var(--som-dim);margin-bottom:10px">
+            Cochez toutes les positions où ce design doit apparaître.
+            Chaque position ajoute <strong>${totalPieces} impressions</strong> au compteur.
+          </p>
+          <div class="som-placements">${positionsHtml}</div>
+
+          <div style="margin-top:16px">${logoHtml}</div>
+        </div>`;
+    }).join('');
+
+    updateDecoValidation();
+  }
+
+  function buildLogoUploadHtml(design) {
+    const dzId = 'dz-' + design.id;
+    const inputId = 'logo-input-' + design.id;
+    const hasFile = !!design.logoFile;
+    return `
+      <label class="som-label">Logo pour ce design <span class="som-required">*</span></label>
+      <div class="som-dropzone${hasFile ? ' success' : ''}" id="${dzId}"
+        ondragover="SOM.dragOverDesign(event,'${design.id}')"
+        ondragleave="SOM.dragLeaveDesign('${design.id}')"
+        ondrop="SOM.dropFileDesign(event,'${design.id}')"
+        onclick="document.getElementById('${inputId}').click()">
+        <input type="file" id="${inputId}" accept=".ai,.svg,.eps,.pdf,.jpg,.jpeg,.png,.gif,.webp"
+          style="display:none" onchange="SOM.handleFileDesign(this.files[0],'${design.id}')">
+        ${hasFile ? `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--som-green)"><polyline points="20 6 9 17 4 12"/></svg>
+            <p style="font-weight:600">${design.logoName}</p>
+            <button class="som-btn som-btn--ghost som-btn--sm" type="button"
+              onclick="event.stopPropagation();SOM.clearLogoDesign('${design.id}')">Supprimer</button>
+          </div>` : `
+          <div>
+            <div class="som-dropzone__icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <p class="som-dropzone__title">Glissez votre fichier ici</p>
+            <p class="som-dropzone__sub">ou <span class="som-link">parcourir</span></p>
+            <div class="som-format-badges"><span class="som-format-badge">.AI</span><span class="som-format-badge">.SVG</span><span class="som-format-badge" style="opacity:.5">.PDF</span><span class="som-format-badge" style="opacity:.5">.PNG</span></div>
+          </div>`}
+      </div>
+      <div class="som-field-group" style="margin-top:10px">
+        <label class="som-label" for="notes-${design.id}">Notes <span class="som-optional">(optionnel)</span></label>
+        <textarea class="som-textarea" id="notes-${design.id}" rows="2"
+          placeholder="Couleurs préférées, contraintes particulières…"
+          oninput="SOM.updateDesignNotes('${design.id}',this.value)">${design.notes || ''}</textarea>
+      </div>`;
+  }
+
+  /* ── Gestion fichiers par design ── */
+  function handleFileDesign(file, designId) {
+    if (!file || !panierItemEnCours) return;
+    const design = panierItemEnCours.designs.find(d => d.id === designId);
+    if (!design) return;
+    const name = file.name.toLowerCase();
+    const ext = name.slice(name.lastIndexOf('.'));
+    const formatsOk = ['.ai', '.svg', '.eps', '.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    if (!formatsOk.includes(ext)) {
+      alert('Format non accepté. Utilisez .AI, .SVG, .PDF, .JPG ou .PNG.');
+      return;
+    }
+    design.logoFile = file;
+    design.logoName = file.name;
+    design.logoVectoriel = ['.ai', '.svg', '.eps'].includes(ext);
+    renderDesigns();
+    updateDecoValidation();
+  }
+
+  function clearLogoDesign(designId) {
+    if (!panierItemEnCours) return;
+    const design = panierItemEnCours.designs.find(d => d.id === designId);
+    if (!design) return;
+    design.logoFile = null;
+    design.logoName = '';
+    renderDesigns();
+    updateDecoValidation();
+  }
+
+  function dragOverDesign(e, designId) {
+    e.preventDefault();
+    document.getElementById('dz-' + designId)?.classList.add('drag-over');
+  }
+
+  function dragLeaveDesign(designId) {
+    document.getElementById('dz-' + designId)?.classList.remove('drag-over');
+  }
+
+  function dropFileDesign(e, designId) {
+    e.preventDefault();
+    dragLeaveDesign(designId);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileDesign(file, designId);
+  }
+
+  function updateDesignNotes(designId, val) {
+    if (!panierItemEnCours) return;
+    const design = panierItemEnCours.designs.find(d => d.id === designId);
+    if (design) design.notes = val;
+  }
+
+  function updateDecoValidation() {
+    const btn = document.getElementById('btn-next-2');
+    if (!btn || !panierItemEnCours) return;
+    const designs = panierItemEnCours.designs;
+    if (designs.length === 0) {
+      btn.disabled = true;
+      return;
+    }
+    // Tous les designs doivent : avoir ≥12 impressions ET un logo
+    const allOk = designs.every(d =>
+      getImpressionsParDesign(d) >= MIN_IMPRESSIONS && d.logoFile !== null
+    );
+    btn.disabled = !allOk;
+  }
+
+  /* ── Fonctions logo (panel-2 mode simple — conservées pour compatibilité) ── */
   function resetLogoUI() {
-    const dzIdle = document.getElementById('dz-idle');
-    const dzSuccess = document.getElementById('dz-success');
-    const dropzone = document.getElementById('dropzone');
-    const svgPreviewBox = document.getElementById('svg-preview-box');
-    const logoInput = document.getElementById('logo-input');
-    if (dzIdle) dzIdle.style.display = 'flex';
-    if (dzSuccess) dzSuccess.style.display = 'none';
-    if (dropzone) dropzone.classList.remove('success', 'drag-over');
-    if (svgPreviewBox) svgPreviewBox.style.display = 'none';
-    if (document.getElementById('svg-preview')) document.getElementById('svg-preview').innerHTML = '';
-    if (logoInput) logoInput.value = '';
-    if (document.getElementById('logo-error')) document.getElementById('logo-error').style.display = 'none';
-    // Reset mode logo
-    setLogoMode('has');
+    // Rien à faire — la UI logo est maintenant par design
   }
 
   function setLogoMode(mode) {
     if (panierItemEnCours) panierItemEnCours.logoMode = mode;
-    document.getElementById('btn-has-logo').classList.toggle('active', mode === 'has');
-    document.getElementById('btn-no-logo').classList.toggle('active', mode === 'no');
-    document.getElementById('logo-upload-section').style.display = mode === 'has' ? 'block' : 'none';
-    document.getElementById('logo-designer-section').style.display = mode === 'no' ? 'block' : 'none';
-    const hasFile = panierItemEnCours?.logoFile;
-    document.getElementById('btn-next-2').disabled = mode === 'no' ? false : !hasFile;
   }
 
-  function handleFile(file) {
-    document.getElementById('logo-error').style.display = 'none';
-    if (!file) return;
-    const name = file.name.toLowerCase();
-    const ext = name.slice(name.lastIndexOf('.'));
-    const formatsVectoriels = ['.ai', '.svg', '.eps', '.pdf'];
-    const formatsImage = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-    const tousFormats = [...formatsVectoriels, ...formatsImage];
-    if (!tousFormats.includes(ext)) {
-      showLogoError('Format non accepté. Utilisez .AI, .SVG, .PDF, .JPG ou .PNG.');
-      document.getElementById('logo-input').value = '';
-      return;
-    }
-    const estVectoriel = ['.ai', '.svg', '.eps'].includes(ext);
-    if (panierItemEnCours) {
-      panierItemEnCours.logoFile = file;
-      panierItemEnCours.logoName = file.name;
-      panierItemEnCours.logoVectoriel = estVectoriel;
-    }
-    document.getElementById('dz-idle').style.display = 'none';
-    document.getElementById('dz-success').style.display = 'flex';
-    document.getElementById('dz-filename').textContent = file.name;
-    document.getElementById('dropzone').classList.add('success');
-    document.getElementById('btn-next-2').disabled = false;
-    // Avertissement vectorisation si format image
-    const warnEl = document.getElementById('logo-vecto-warning');
-    if (warnEl) warnEl.style.display = estVectoriel ? 'none' : 'flex';
-    if (ext === '.svg' || file.type === 'image/svg+xml') {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const c = e.target.result;
-        if (!c.includes('<script')) {
-          document.getElementById('svg-preview').innerHTML = c;
-          document.getElementById('svg-preview-box').style.display = 'block';
-        }
-      };
-      reader.readAsText(file);
-    }
-  }
-
-  function handleRefFile(file) {
-    if (!file || !panierItemEnCours) return;
-    panierItemEnCours.logoRefFile = file;
-    const refSuccess = document.getElementById('ref-success');
-    const refIdle = document.getElementById('ref-idle');
-    if (document.getElementById('ref-filename')) document.getElementById('ref-filename').textContent = file.name;
-    if (refSuccess) refSuccess.style.display = 'flex';
-    if (refIdle) refIdle.style.display = 'none';
-    document.getElementById('btn-next-2').disabled = false;
-  }
-
-  function clearLogo() {
-    if (panierItemEnCours) { panierItemEnCours.logoFile = null; panierItemEnCours.logoName = ''; }
-    resetLogoUI();
-  }
-
-  function dragOver(e) { e.preventDefault(); document.getElementById('dropzone').classList.add('drag-over'); }
-  function dragLeave() { document.getElementById('dropzone').classList.remove('drag-over'); }
-  function dropFile(e) {
-    e.preventDefault(); dragLeave();
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      const dt = new DataTransfer(); dt.items.add(file);
-      document.getElementById('logo-input').files = dt.files;
-      handleFile(file);
-    }
-  }
-  function showLogoError(msg) {
-    const el = document.getElementById('logo-error');
-    el.textContent = msg; el.style.display = 'block';
-  }
+  function handleFile(file) { /* conservé pour compatibilité */ }
+  function handleRefFile(file) { /* conservé pour compatibilité */ }
+  function clearLogo() { /* conservé pour compatibilité */ }
+  function dragOver(e) { e.preventDefault(); }
+  function dragLeave() {}
+  function dropFile(e) { e.preventDefault(); }
+  function setDecoMode(mode) { /* conservé pour compatibilité */ }
+  function initPlacements() { /* conservé pour compatibilité — logique migrée vers designs */ }
 
   /* ══════════════════════════════════════
      PANIER — ajout et gestion
@@ -803,24 +940,16 @@
 
   function ajouterAuPanier() {
     if (!panierItemEnCours) return;
-    // Sauvegarder les notes logo si présentes
-    const logoNotes = document.getElementById('logo-notes')?.value || '';
-    const logoDesc = document.getElementById('logo-description')?.value || '';
-    panierItemEnCours.logoNotes = logoNotes;
-    panierItemEnCours.logoDescription = logoDesc;
-
-    // Ajouter ou mettre à jour dans le panier
     const existingIdx = panier.findIndex(i => i.id === panierItemEnCours.id);
     if (existingIdx >= 0) {
       panier[existingIdx] = { ...panierItemEnCours };
     } else {
       panier.push({ ...panierItemEnCours });
     }
-
     panierItemEnCours = null;
     document.getElementById('som-form-section').style.display = 'none';
     renderPanier();
-    renderCatalogue(); // Mettre à jour les badges "Ajouté"
+    renderCatalogue();
   }
 
   function retirerDuPanier(itemId) {
@@ -868,7 +997,10 @@
               const qty = Object.values(b.quantities).reduce((a, c) => a + c, 0);
               return `<span class="som-panier-swatch" style="background:${hex}" title="${b.color}"></span><span class="som-panier-color-qty">${getNomCouleurFR(b.color)} ×${qty}</span>`;
             }).join('');
-            const logoInfo = item.logoMode === 'has' ? (item.logoName || '—') : 'Designer demandé';
+            const designsResume = (item.designs || []).map((d, i) => {
+              const imp = (d.positions || []).length * totalQty;
+              return `Design ${i+1} : ${(d.positions || []).length} position${d.positions.length !== 1 ? 's' : ''} · ${imp} impressions`;
+            }).join(' | ') || 'Aucun design';
             return `
               <div class="som-panier-item">
                 <div class="som-panier-item__img">
@@ -881,9 +1013,7 @@
                   <div class="som-panier-item__meta">
                     <span>${totalQty} articles</span>
                     <span>·</span>
-                    <span>${(item.placements || []).map(p => p.label).join(', ') || 'Aucun'}</span>
-                    <span>·</span>
-                    <span>${logoInfo}</span>
+                    <span>${designsResume}</span>
                   </div>
                 </div>
                 <div class="som-panier-item__actions">
@@ -914,24 +1044,17 @@
     if (section) section.style.display = 'none';
     const formSection = document.getElementById('som-form-section');
     formSection.style.display = 'block';
-
-    // Masquer les panneaux 1-2-3, aller directement au panneau coordonnées
-    // On réutilise le panel-3 (coordonnées) et panel-4 (confirmation)
-    // On crée un faux état pour le header
     document.getElementById('sel-name').textContent = `${panier.length} produit${panier.length > 1 ? 's' : ''} sélectionné${panier.length > 1 ? 's' : ''}`;
     document.getElementById('sel-sku').textContent = panier.map(i => i.sku).join(', ');
     const imgEl = document.getElementById('sel-img');
     imgEl.innerHTML = panier[0]?.image ? `<img src="${panier[0].image}" alt="" style="width:100%;height:100%;object-fit:cover;">` : '';
-
     goStepCoordonnees();
     formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function goStepCoordonnees() {
-    // Cacher tous les panels
     document.querySelectorAll('.som-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-3').classList.add('active');
-    // Mettre à jour les steps — on saute 1 et 2
     document.querySelectorAll('.som-step').forEach(s => {
       const n = parseInt(s.dataset.step);
       s.classList.toggle('active', n === 3);
@@ -955,19 +1078,32 @@
         const total = Object.values(b.quantities).reduce((a, c) => a + c, 0);
         const sizes = SIZES.filter(s => b.quantities[s] > 0).map(s => `${b.quantities[s]}×${s}`).join(', ');
         const hex = COLOR_MAP[(b.color || '').toLowerCase().replace(/\s+/g, '-')] || '#ccc';
-        return `<div class="som-recap-color"><span class="som-recap-swatch" style="background:${hex}"></span><strong>${getNomCouleurFR(b.color)}</strong> — ${total} articles (${sizes})</div>`;
+        return `<div class="som-recap-color"><span class="som-recap-swatch" style="background:${hex}"></span><strong>${getNomCouleurFR(b.color)}</strong> — ${total} articles${sizes ? ' (' + sizes + ')' : ''}</div>`;
       }).join('');
-      const logoInfo = item.logoMode === 'has' ? (item.logoName || '—') : 'Service designer demandé';
+
+      const designsHtml = (item.designs || []).map((d, i) => {
+        const imp = (d.positions || []).length * totalQty;
+        const positions = d.positions.map(p => {
+          const found = [...PLACEMENTS_DTF, ...PLACEMENTS_PATCH].find(pl => pl.value === p);
+          return found ? `${found.label} (${found.size})` : p;
+        }).join(', ');
+        return `<div style="font-size:12px;color:var(--som-muted);margin-top:4px">
+          Design ${i+1} · ${d.type.toUpperCase()} · ${d.logoName || 'Logo non fourni'} · ${imp} impressions<br>
+          <span style="color:var(--som-dim)">Positions : ${positions || 'Aucune'}</span>
+        </div>`;
+      }).join('');
+
       return `
         <div class="som-recap-produit">
           <div class="som-recap-produit__header">
             ${item.image ? `<img src="${item.image}" alt="${item.name}" class="som-recap-produit__img">` : ''}
             <div>
               <strong>${item.name}</strong> <span style="color:#555">(${item.sku})</span>
-              <div style="font-size:12px;color:#666;margin-top:2px">${totalQty} articles · ${(item.placements || []).map(p => p.label).join(', ') || 'Aucun emplacement'} · Logo : ${logoInfo}</div>
+              <div style="font-size:12px;color:#666;margin-top:2px">${totalQty} articles</div>
             </div>
           </div>
           <div style="margin-top:10px">${blocksHtml}</div>
+          <div style="margin-top:10px;border-top:1px solid var(--som-border);padding-top:10px">${designsHtml}</div>
         </div>`;
     }).join('');
 
@@ -990,18 +1126,24 @@
   function syncHidden() {
     const grandTotal = panier.reduce((s, item) =>
       s + item.colorBlocks.reduce((ss, b) => ss + Object.values(b.quantities).reduce((a, c) => a + c, 0), 0), 0);
-    // Sérialiser tout le panier (sans les fichiers File)
     const panierSerialisable = panier.map(item => ({
       ...item,
+      designs: (item.designs || []).map(d => ({
+        ...d,
+        logoFile: d.logoName || '',
+        logoRefFile: d.logoRefFile ? d.logoRefFile.name : '',
+      })),
       logoFile: item.logoName || '',
       logoRefFile: item.logoRefFile ? item.logoRefFile.name : '',
     }));
     if (document.getElementById('h-product-name')) document.getElementById('h-product-name').value = panier.map(i => i.name).join(' | ');
     if (document.getElementById('h-product-sku')) document.getElementById('h-product-sku').value = panier.map(i => i.sku).join(' | ');
     if (document.getElementById('h-color-blocks')) document.getElementById('h-color-blocks').value = JSON.stringify(panierSerialisable);
-    if (document.getElementById('h-placement')) document.getElementById('h-placement').value = panier.map(i => (i.placements || []).map(p => p.label).join(', ')).join(' | ');
+    if (document.getElementById('h-placement')) document.getElementById('h-placement').value = panier.map(i =>
+      (i.designs || []).map(d => d.positions.join('+')).join(' | ')
+    ).join(' || ');
     if (document.getElementById('h-total-qty')) document.getElementById('h-total-qty').value = grandTotal;
-    if (document.getElementById('h-logo-mode')) document.getElementById('h-logo-mode').value = panier.map(i => i.logoMode).join(' | ');
+    if (document.getElementById('h-logo-mode')) document.getElementById('h-logo-mode').value = 'designs';
     if (document.getElementById('h-prenom')) document.getElementById('h-prenom').value = document.getElementById('f-prenom').value;
     if (document.getElementById('h-nom')) document.getElementById('h-nom').value = document.getElementById('f-nom').value;
     if (document.getElementById('h-email')) document.getElementById('h-email').value = document.getElementById('f-email').value;
@@ -1030,10 +1172,11 @@
       btn.innerHTML = '<span>Envoi en cours…</span>';
       btn.disabled = true;
       const fd = new FormData(form);
-      // Attacher tous les logos
+      // Attacher tous les logos par design
       panier.forEach((item, i) => {
-        if (item.logoFile) fd.set(`logo_file_${i}`, item.logoFile, item.logoFile.name);
-        if (item.logoRefFile) fd.set(`logo_ref_file_${i}`, item.logoRefFile, item.logoRefFile.name);
+        (item.designs || []).forEach((d, j) => {
+          if (d.logoFile) fd.set(`logo_design_${i}_${j}`, d.logoFile, d.logoFile.name);
+        });
       });
       try {
         const r = await fetch(form.action, { method: 'POST', body: fd });
@@ -1062,8 +1205,9 @@
     currentSousCat = null;
     renderSousCats();
     renderCatalogue();
-    initPlacements();
     initForm();
+    // Initialiser le résumé quantités
+    updateQtySummary();
   });
 
   /* ── Recherche ── */
@@ -1091,6 +1235,11 @@
     openModal, openModalIdx, closeModal, selectSwatch, setMainImg, choisirProduit,
     goStep, addColorBlock, removeColorBlock, updateColor, updateQty,
     setLogoMode, setDecoMode, handleFile, handleRefFile, clearLogo, dragOver, dragLeave, dropFile,
+    // Nouvelles fonctions décoration
+    addDesign, removeDesign, updateDesignType, togglePosition,
+    handleFileDesign, clearLogoDesign, dragOverDesign, dragLeaveDesign, dropFileDesign,
+    updateDesignNotes,
+    // Panier
     ajouterAuPanier, retirerDuPanier, modifierItem, ajouterAutreProduit, passerAuxCoordonnees,
     retourCatalogue, buildRecap,
     setSearch, clearSearch,
