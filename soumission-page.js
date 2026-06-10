@@ -584,40 +584,82 @@
     var centre  = zoneOn('centre');
     var arriere = zoneOn('arriere');
     var manche  = zoneOn('manche');
-    var gF = 'rgba(201,168,76,0.3)'; var gS = '#c9a84c';
-    var bF = 'rgba(74,120,201,0.3)'; var bS = '#4a78c9';
+    var gF = 'rgba(201,168,76,0.35)'; var gS = '#c9a84c';
+    var bF = 'rgba(74,120,201,0.35)'; var bS = '#4a78c9';
     var oF = 'rgba(255,255,255,0.03)'; var oS = '#3a3a3a';
     function st(on, fill, stroke) {
-      return 'fill:' + (on?fill:oF) + ';stroke:' + (on?stroke:oS) + ';stroke-width:1.2;cursor:pointer;';
+      return 'fill:' + (on?fill:oF) + ';stroke:' + (on?stroke:oS) + ';stroke-width:1.5;cursor:pointer;';
     }
     var d = design.id;
-    var svg = '<svg viewBox="0 0 180 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;" data-design="' + d + '">';
-    svg += '<path d="M52,32 L16,58 L29,75 L29,185 L151,185 L151,75 L164,58 L128,32 Q115,16 90,16 Q65,16 52,32 Z" fill="#222" stroke="#3a3a3a" stroke-width="1.5"/>';
-    svg += '<path d="M70,30 Q90,46 110,30" fill="none" stroke="#3a3a3a" stroke-width="1.5"/>';
+
+    /* viewBox : 200 wide, 420 tall (avant 0-200, arriere 220-420) */
+    var svg = '<svg viewBox="0 0 200 430" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:220px;height:auto;display:block;" data-design="' + d + '">';
+
+    /* ══ ETIQUETTE AVANT ══ */
+    svg += '<text x="100" y="14" text-anchor="middle" font-size="9" fill="#555" font-family="system-ui" letter-spacing="2">AVANT</text>';
+
+    /* ══ VUE AVANT (y offset 18) ══ */
+    /* Corps */
+    svg += '<path d="M55,38 L14,68 L30,88 L30,195 L170,195 L170,88 L186,68 L145,38 Q130,20 100,20 Q70,20 55,38 Z" fill="#252525" stroke="#3a3a3a" stroke-width="1.5"/>';
+    /* Col */
+    svg += '<path d="M74,36 Q100,54 126,36" fill="none" stroke="#444" stroke-width="1.5"/>';
+
+    /* Manches avant */
     svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="manche">';
-    svg += '<path d="M52,32 L16,58 L29,75 L46,64 Z" style="' + st(manche,gF,gS) + '"/>';
-    svg += '<path d="M128,32 L164,58 L151,75 L134,64 Z" style="' + st(manche,gF,gS) + '"/>';
-    if (manche) svg += '<text x="22" y="60" text-anchor="middle" font-size="8" fill="' + gS + '" pointer-events="none">✓</text>';
+    svg += '<path d="M55,38 L14,68 L30,88 L48,75 Z" style="' + st(manche,gF,gS) + '"/>';
+    svg += '<path d="M145,38 L186,68 L170,88 L152,75 Z" style="' + st(manche,gF,gS) + '"/>';
+    if (manche) {
+      svg += '<text x="18" y="68" text-anchor="middle" font-size="10" fill="' + gS + '" pointer-events="none">✓</text>';
+    } else {
+      svg += '<text x="18" y="70" text-anchor="middle" font-size="7" fill="#555" pointer-events="none" font-family="system-ui">M</text>';
+      svg += '<text x="182" y="70" text-anchor="middle" font-size="7" fill="#555" pointer-events="none" font-family="system-ui">M</text>';
+    }
     svg += '</g>';
+
+    /* Zone Coeur — cote DROIT du spectateur = cote GAUCHE du porteur */
+    /* Sur un t-shirt vu de face, le coeur est a gauche pour le spectateur */
     svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="coeur">';
-    svg += '<rect x="54" y="52" width="34" height="28" rx="2" style="' + st(coeur,gF,gS) + '"/>';
-    svg += '<text x="71" y="64" text-anchor="middle" font-size="7" fill="' + (coeur?gS:'#555') + '" pointer-events="none" font-family="system-ui">Coeur</text>';
-    svg += '<text x="71" y="73" text-anchor="middle" font-size="6" fill="' + (coeur?gS:'#444') + '" pointer-events="none" font-family="system-ui">4x4"</text>';
-    if (coeur) svg += '<text x="71" y="60" text-anchor="middle" font-size="8" fill="' + gS + '" pointer-events="none">✓</text>';
+    svg += '<rect x="50" y="60" width="40" height="34" rx="2" style="' + st(coeur,gF,gS) + '"/>';
+    svg += '<text x="70" y="75" text-anchor="middle" font-size="8" fill="' + (coeur?gS:'#555') + '" pointer-events="none" font-family="system-ui">Coeur</text>';
+    svg += '<text x="70" y="86" text-anchor="middle" font-size="7" fill="' + (coeur?gS:'#444') + '" pointer-events="none" font-family="system-ui">4 x 4"</text>';
+    if (coeur) svg += '<text x="70" y="72" text-anchor="middle" font-size="10" fill="' + gS + '" pointer-events="none">✓</text>';
     svg += '</g>';
+
+    /* Zone Centre avant */
     svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="centre">';
-    svg += '<rect x="62" y="88" width="56" height="55" rx="2" style="' + st(centre,gF,gS) + '"/>';
-    svg += '<text x="90" y="113" text-anchor="middle" font-size="7" fill="' + (centre?gS:'#555') + '" pointer-events="none" font-family="system-ui">Centre</text>';
-    svg += '<text x="90" y="123" text-anchor="middle" font-size="6" fill="' + (centre?gS:'#444') + '" pointer-events="none" font-family="system-ui">11x11"</text>';
-    if (centre) svg += '<text x="90" y="107" text-anchor="middle" font-size="8" fill="' + gS + '" pointer-events="none">✓</text>';
+    svg += '<rect x="60" y="100" width="80" height="72" rx="2" style="' + st(centre,gF,gS) + '"/>';
+    svg += '<text x="100" y="133" text-anchor="middle" font-size="8" fill="' + (centre?gS:'#555') + '" pointer-events="none" font-family="system-ui">Centre</text>';
+    svg += '<text x="100" y="145" text-anchor="middle" font-size="7" fill="' + (centre?gS:'#444') + '" pointer-events="none" font-family="system-ui">11 x 11"</text>';
+    if (centre) svg += '<text x="100" y="128" text-anchor="middle" font-size="10" fill="' + gS + '" pointer-events="none">✓</text>';
     svg += '</g>';
+
+    /* ══ SEPARATEUR ══ */
+    svg += '<line x1="20" y1="210" x2="180" y2="210" stroke="#2a2a2a" stroke-width="1"/>';
+
+    /* ══ ETIQUETTE ARRIERE ══ */
+    svg += '<text x="100" y="228" text-anchor="middle" font-size="9" fill="#555" font-family="system-ui" letter-spacing="2">ARRIERE</text>';
+
+    /* ══ VUE ARRIERE (y offset +215) ══ */
+    var oy = 215;
+    /* Corps arriere */
+    svg += '<path d="M55,' + (38+oy) + ' L14,' + (68+oy) + ' L30,' + (88+oy) + ' L30,' + (195+oy) + ' L170,' + (195+oy) + ' L170,' + (88+oy) + ' L186,' + (68+oy) + ' L145,' + (38+oy) + ' Q130,' + (20+oy) + ' 100,' + (20+oy) + ' Q70,' + (20+oy) + ' 55,' + (38+oy) + ' Z" fill="#252525" stroke="#3a3a3a" stroke-width="1.5"/>';
+    /* Col arriere */
+    svg += '<path d="M80,' + (36+oy) + ' Q100,' + (44+oy) + ' 120,' + (36+oy) + '" fill="none" stroke="#444" stroke-width="1.5"/>';
+
+    /* Manches arriere */
+    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="manche">';
+    svg += '<path d="M55,' + (38+oy) + ' L14,' + (68+oy) + ' L30,' + (88+oy) + ' L48,' + (75+oy) + ' Z" style="' + st(manche,gF,gS) + '"/>';
+    svg += '<path d="M145,' + (38+oy) + ' L186,' + (68+oy) + ' L170,' + (88+oy) + ' L152,' + (75+oy) + ' Z" style="' + st(manche,gF,gS) + '"/>';
+    svg += '</g>';
+
+    /* Zone Arriere — grande zone dos */
     svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="arriere">';
-    svg += '<rect x="62" y="150" width="56" height="26" rx="2" style="' + st(arriere,bF,bS) + '"/>';
-    svg += '<text x="90" y="161" text-anchor="middle" font-size="7" fill="' + (arriere?bS:'#555') + '" pointer-events="none" font-family="system-ui">Arriere</text>';
-    svg += '<text x="90" y="170" text-anchor="middle" font-size="6" fill="' + (arriere?bS:'#444') + '" pointer-events="none" font-family="system-ui">(dos)</text>';
-    if (arriere) svg += '<text x="90" y="158" text-anchor="middle" font-size="8" fill="' + bS + '" pointer-events="none">✓</text>';
+    svg += '<rect x="46" y="' + (52+oy) + '" width="108" height="120" rx="2" style="' + st(arriere,bF,bS) + '"/>';
+    svg += '<text x="100" y="' + (108+oy) + '" text-anchor="middle" font-size="8" fill="' + (arriere?bS:'#555') + '" pointer-events="none" font-family="system-ui">Arriere</text>';
+    svg += '<text x="100" y="' + (120+oy) + '" text-anchor="middle" font-size="7" fill="' + (arriere?bS:'#444') + '" pointer-events="none" font-family="system-ui">11 x 11"</text>';
+    if (arriere) svg += '<text x="100" y="' + (103+oy) + '" text-anchor="middle" font-size="10" fill="' + bS + '" pointer-events="none">✓</text>';
     svg += '</g>';
-    svg += '<text x="90" y="200" text-anchor="middle" font-size="6.5" fill="#444" font-family="system-ui">Cliquez une zone</text>';
+
     svg += '</svg>';
     return svg;
   }
