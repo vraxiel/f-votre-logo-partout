@@ -551,18 +551,34 @@
       const groupeActif=getGroupeActif(design,placements);
       const n=design.positions.length;
 
+     const autresDesigns = panierItemEnCours.designs.filter(d=>d.id!==design.id);
+      const zonesDejaUtilisees = new Set();
+      autresDesigns.forEach(d=>{
+        d.positions.forEach(pv=>{
+          const pl=placements.find(p=>p.value===pv);
+          if (pl) zonesDejaUtilisees.add(pl.zone);
+        });
+      });
+     
       const msgIncompat = groupeActif
         ? '<div style="display:flex;gap:8px;align-items:flex-start;padding:10px 14px;margin-bottom:12px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);font-size:12px;color:#aaa">'
           +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
           +'<span>Les emplacements grisés utilisent une taille différente. Un même design doit avoir la même taille d\'impression partout. Pour combiner des tailles différentes, créez un second design.</span></div>'
         : '';
-
-      const positionsHtml=msgIncompat+placements.map(p=>{
+      const msgDejaUtilise = zonesDejaUtilisees.size > 0
+        ? '<div style="display:flex;gap:8px;align-items:flex-start;padding:10px 14px;margin-bottom:12px;background:rgba(192,41,58,0.06);border:1px solid rgba(192,41,58,0.3);font-size:12px;color:#aaa">'
+          +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0293a" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+          +'<span>Les emplacements en rouge sont déjà utilisés par un autre design. Chaque emplacement ne peut être utilisé que par un seul design à la fois.</span></div>'
+        : '';
+      const positionsHtml=msgIncompat+msgDejaUtilise+placements.map(p=>{
         const checked=design.positions.includes(p.value);
-        const incompatible=groupeActif&&p.groupe!=='autre'&&p.groupe!==groupeActif&&!checked;
+        const incompatibleTaille=groupeActif&&p.groupe!=='autre'&&p.groupe!==groupeActif&&!checked;
+        const dejaUtilise=!checked&&zonesDejaUtilisees.has(p.zone)&&p.zone!=='autre';
+        const incompatible=incompatibleTaille||dejaUtilise;
+        const styleExtra=dejaUtilise?'opacity:0.35;cursor:not-allowed;border-color:rgba(192,41,58,0.5);':incompatibleTaille?'opacity:0.35;cursor:not-allowed;':'';
         return '<label class="som-placement-card'+(checked?' som-placement-card--checked':'')+(incompatible?' som-placement-card--disabled':'')+'"'
           +' data-design="'+design.id+'" data-pos="'+p.value+'"'
-          +(incompatible?' style="opacity:0.35;cursor:not-allowed;"':'')+' >'
+          +(styleExtra?' style="'+styleExtra+'"':'')+' >'
           +'<input type="checkbox"'+(checked?' checked':'')+(incompatible?' disabled':'')+' onchange="SOM.togglePosition(\''+design.id+'\',\''+p.value+'\')">'
           +'<span class="som-placement-card__label">'+p.label+'</span>'
           +'<span class="som-placement-card__size">'+p.size+'</span>'
