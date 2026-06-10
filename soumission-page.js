@@ -90,17 +90,19 @@
   let panierItemEnCours = null;
 
   const PLACEMENTS_DTF = [
-    { value:'avant-coeur-petit',  label:'Avant — Cœur',   size:'4" × 2,5"',  price:2.00,  zone:'coeur' },
-    { value:'avant-coeur',        label:'Avant — Cœur',   size:'4" × 4"',    price:2.00,  zone:'coeur' },
-    { value:'avant-centre-petit', label:'Avant — Centré', size:'6" × 6"',    price:2.25,  zone:'centre' },
-    { value:'avant-centre-grand', label:'Avant — Centré', size:'11" × 11"',  price:7.00,  zone:'centre' },
-    { value:'avant-centre-max',   label:'Avant — Centré', size:'14" × 14"',  price:11.40, zone:'centre' },
-    { value:'arriere-petit',      label:'Arrière',         size:'11" × 6,5"', price:3.75,  zone:'arriere' },
-    { value:'arriere',            label:'Arrière',         size:'11" × 11"',  price:6.60,  zone:'arriere' },
-    { value:'arriere-max',        label:'Arrière',         size:'14" × 14"',  price:11.40, zone:'arriere' },
-    { value:'manche-petit',       label:'Manche',          size:'11" × 2"',   price:2.00,  zone:'manche' },
-    { value:'manche-grand',       label:'Manche',          size:'11" × 3,5"', price:2.75,  zone:'manche' },
-    { value:'autre-dtf',          label:'Autre',           size:'Sur mesure', price:0,     zone:'autre' },
+    { value:'avant-coeur-petit',  label:'Avant — Coeur',   size:'Zone max 4" x 2,5"',  price:2.00,  zone:'coeur' },
+    { value:'avant-coeur',        label:'Avant — Coeur',   size:'Zone max 4" x 4"',    price:2.00,  zone:'coeur' },
+    { value:'avant-centre-petit', label:'Avant — Centre',  size:'Zone max 6" x 6"',    price:2.25,  zone:'centre' },
+    { value:'avant-centre-grand', label:'Avant — Centre',  size:'Zone max 11" x 11"',  price:7.00,  zone:'centre' },
+    { value:'avant-centre-max',   label:'Avant — Centre',  size:'Zone max 14" x 14"',  price:11.40, zone:'centre' },
+    { value:'arriere-petit',      label:'Arriere',          size:'Zone max 11" x 6,5"', price:3.75,  zone:'arriere' },
+    { value:'arriere',            label:'Arriere',          size:'Zone max 11" x 11"',  price:6.60,  zone:'arriere' },
+    { value:'arriere-max',        label:'Arriere',          size:'Zone max 14" x 14"',  price:11.40, zone:'arriere' },
+    { value:'manche-gauche-petit', label:'Manche gauche', size:'Zone max 11" x 2"',   price:2.00,  zone:'manche-gauche' },
+    { value:'manche-gauche-grand', label:'Manche gauche', size:'Zone max 11" x 3,5"', price:2.75,  zone:'manche-gauche' },
+    { value:'manche-droite-petit', label:'Manche droite', size:'Zone max 11" x 2"',   price:2.00,  zone:'manche-droite' },
+    { value:'manche-droite-grand', label:'Manche droite', size:'Zone max 11" x 3,5"', price:2.75,  zone:'manche-droite' },
+    { value:'autre-dtf',          label:'Autre',            size:'Sur mesure',                price:0,     zone:'autre' },
   ];
 
   const PLACEMENTS_PATCH = [
@@ -491,8 +493,21 @@
     if (!panierItemEnCours) return;
     const d=panierItemEnCours.designs.find(d=>d.id===designId);
     if (!d) return;
-    const idx=d.positions.indexOf(posValue);
-    if (idx>=0) d.positions.splice(idx,1); else d.positions.push(posValue);
+    const placements = d.type==='patch' ? PLACEMENTS_PATCH : PLACEMENTS_DTF;
+    // Trouver la zone de cet emplacement
+    const placement = placements.find(function(p){return p.value===posValue;});
+    const zone = placement ? placement.zone : null;
+    if (d.positions.includes(posValue)) {
+      // Decocher
+      d.positions = d.positions.filter(function(p){return p!==posValue;});
+    } else {
+      // Cocher — retirer les autres emplacements de la meme zone
+      if (zone) {
+        const sameZone = placements.filter(function(p){return p.zone===zone;}).map(function(p){return p.value;});
+        d.positions = d.positions.filter(function(p){return !sameZone.includes(p);});
+      }
+      d.positions.push(posValue);
+    }
     renderDesigns();
     updateDecoValidation();
   }
@@ -576,89 +591,110 @@
 
   function buildTshirtSVG(design) {
     var pos = design.positions;
-    var placements = design.type === 'patch' ? PLACEMENTS_PATCH : PLACEMENTS_DTF;
-    function zoneOn(zone) {
-      return placements.filter(function(p){return p.zone===zone;}).some(function(p){return pos.includes(p.value);});
-    }
-    var coeur   = zoneOn('coeur');
-    var centre  = zoneOn('centre');
-    var arriere = zoneOn('arriere');
-    var manche  = zoneOn('manche');
-    var gF = 'rgba(201,168,76,0.35)'; var gS = '#c9a84c';
-    var bF = 'rgba(74,120,201,0.35)'; var bS = '#4a78c9';
-    var oF = 'rgba(255,255,255,0.03)'; var oS = '#3a3a3a';
-    function st(on, fill, stroke) {
-      return 'fill:' + (on?fill:oF) + ';stroke:' + (on?stroke:oS) + ';stroke-width:1.5;cursor:pointer;';
-    }
+    var gS = '#c9a84c'; var bS = '#4a78c9';
     var d = design.id;
 
-    /* viewBox : 200 wide, 420 tall (avant 0-200, arriere 220-420) */
+    /* Echelle : 1 pouce = 7px */
+    var SC = 7;
+
+    /* Positions de reference sur le SVG (centre du t-shirt = x:100) */
+    /* Avant : corps y=20 a y=200, poitrine commence a y=55 */
+    /* Arriere : corps y=230 a y=410 */
+
+    /* Definir chaque emplacement avec sa position et taille reelle */
+    var ZONES_AVANT = {
+      'avant-coeur-petit':  { x:110, y:52, w:4*SC,   h:2.5*SC, label:'4x2.5"',  color:gS },
+      'avant-coeur':        { x:110, y:52, w:4*SC,   h:4*SC,   label:'4x4"',    color:gS },
+      'avant-centre-petit': { x:79,  y:98, w:6*SC,   h:6*SC,   label:'6x6"',    color:gS },
+      'avant-centre-grand': { x:62,  y:95, w:11*SC,  h:11*SC,  label:'11x11"',  color:gS },
+      'avant-centre-max':   { x:51,  y:90, w:14*SC,  h:14*SC,  label:'14x14"',  color:gS },
+      'manche-petit':       { x:14,  y:62, w:11*SC,  h:2*SC,   label:'11x2"',   color:gS, rotate:-22 },
+      'manche-grand':       { x:14,  y:62, w:11*SC,  h:3.5*SC, label:'11x3.5"', color:gS, rotate:-22 },
+    };
+    var ZONES_ARRIERE = {
+      'arriere-petit':      { x:62,  y:268, w:11*SC,  h:6.5*SC, label:'11x6.5"', color:bS },
+      'arriere':            { x:62,  y:262, w:11*SC,  h:11*SC,  label:'11x11"',  color:bS },
+      'arriere-max':        { x:51,  y:268, w:14*SC,  h:14*SC,  label:'14x14"',  color:bS },
+    };
+
     var svg = '<svg viewBox="0 0 200 430" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:220px;height:auto;display:block;" data-design="' + d + '">';
 
-    /* ══ ETIQUETTE AVANT ══ */
-    svg += '<text x="100" y="14" text-anchor="middle" font-size="9" fill="#555" font-family="system-ui" letter-spacing="2">AVANT</text>';
-
-    /* ══ VUE AVANT (y offset 18) ══ */
-    /* Corps */
+    /* ── AVANT ── */
+    svg += '<text x="100" y="14" text-anchor="middle" font-size="8" fill="#555" font-family="system-ui" letter-spacing="2">AVANT</text>';
     svg += '<path d="M55,38 L14,68 L30,88 L30,195 L170,195 L170,88 L186,68 L145,38 Q130,20 100,20 Q70,20 55,38 Z" fill="#252525" stroke="#3a3a3a" stroke-width="1.5"/>';
-    /* Col */
     svg += '<path d="M74,36 Q100,54 126,36" fill="none" stroke="#444" stroke-width="1.5"/>';
+    /* Manches avant grisees */
+    svg += '<path d="M55,38 L14,68 L30,88 L48,75 Z" fill="rgba(255,255,255,0.03)" stroke="#3a3a3a" stroke-width="1.2"/>';
+    svg += '<path d="M145,38 L186,68 L170,88 L152,75 Z" fill="rgba(255,255,255,0.03)" stroke="#3a3a3a" stroke-width="1.2"/>';
 
-    /* Manches avant */
-    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="manche">';
-    svg += '<path d="M55,38 L14,68 L30,88 L48,75 Z" style="' + st(manche,gF,gS) + '"/>';
-    svg += '<path d="M145,38 L186,68 L170,88 L152,75 Z" style="' + st(manche,gF,gS) + '"/>';
-    if (manche) {
-      svg += '<text x="18" y="68" text-anchor="middle" font-size="10" fill="' + gS + '" pointer-events="none">✓</text>';
-    } else {
-      svg += '<text x="18" y="70" text-anchor="middle" font-size="7" fill="#555" pointer-events="none" font-family="system-ui">M</text>';
-      svg += '<text x="182" y="70" text-anchor="middle" font-size="7" fill="#555" pointer-events="none" font-family="system-ui">M</text>';
-    }
+    /* Zones avant cliquables (toujours visibles, dim si non selectionne) */
+    var mancheGOn = pos.includes('manche-gauche-petit') || pos.includes('manche-gauche-grand');
+    var mancheDOn = pos.includes('manche-droite-petit') || pos.includes('manche-droite-grand');
+    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="manche-droite">';
+    svg += '<path d="M55,38 L14,68 L30,88 L48,75 Z" style="fill:' + (mancheDOn?'rgba(201,168,76,0.35)':'rgba(255,255,255,0.03)') + ';stroke:' + (mancheDOn?gS:'#3a3a3a') + ';stroke-width:1.5;cursor:pointer;"/>';
+    if (mancheDOn) svg += '<text x="22" y="68" text-anchor="middle" font-size="9" fill="' + gS + '" pointer-events="none">✓</text>';
+    else svg += '<text x="22" y="68" text-anchor="middle" font-size="6" fill="#555" pointer-events="none" font-family="system-ui">D</text>';
+    svg += '</g>';
+    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="manche-gauche">';
+    svg += '<path d="M145,38 L186,68 L170,88 L152,75 Z" style="fill:' + (mancheGOn?'rgba(201,168,76,0.35)':'rgba(255,255,255,0.03)') + ';stroke:' + (mancheGOn?gS:'#3a3a3a') + ';stroke-width:1.5;cursor:pointer;"/>';
+    if (mancheGOn) svg += '<text x="168" y="68" text-anchor="middle" font-size="9" fill="' + gS + '" pointer-events="none">✓</text>';
+    else svg += '<text x="168" y="68" text-anchor="middle" font-size="6" fill="#555" pointer-events="none" font-family="system-ui">G</text>';
+    svg += '</g>';
     svg += '</g>';
 
-    /* Zone Coeur — cote DROIT du spectateur = cote GAUCHE du porteur */
-    /* Sur un t-shirt vu de face, le coeur est a gauche pour le spectateur */
-    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="coeur">';
-    svg += '<rect x="50" y="60" width="40" height="34" rx="2" style="' + st(coeur,gF,gS) + '"/>';
-    svg += '<text x="70" y="75" text-anchor="middle" font-size="8" fill="' + (coeur?gS:'#555') + '" pointer-events="none" font-family="system-ui">Coeur</text>';
-    svg += '<text x="70" y="86" text-anchor="middle" font-size="7" fill="' + (coeur?gS:'#444') + '" pointer-events="none" font-family="system-ui">4 x 4"</text>';
-    if (coeur) svg += '<text x="70" y="72" text-anchor="middle" font-size="10" fill="' + gS + '" pointer-events="none">✓</text>';
+    /* Afficher chaque zone avant cochee avec sa vraie taille */
+    Object.keys(ZONES_AVANT).forEach(function(key) {
+      if (!pos.includes(key)) return;
+      var z = ZONES_AVANT[key];
+      if (z.rotate) return; /* manches traitees separement */
+      svg += '<rect x="' + z.x + '" y="' + z.y + '" width="' + z.w + '" height="' + z.h + '" rx="2"'
+        + ' fill="rgba(201,168,76,0.25)" stroke="' + z.color + '" stroke-width="1.5" pointer-events="none"/>';
+      svg += '<text x="' + (z.x + z.w/2) + '" y="' + (z.y + z.h/2 + 3) + '" text-anchor="middle"'
+        + ' font-size="6.5" fill="' + z.color + '" pointer-events="none" font-family="system-ui">' + z.label + '</text>';
+    });
+
+    /* Zones cliquables invisibles pour coeur et centre */
+    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="coeur" style="cursor:pointer">';
+    svg += '<rect x="110" y="50" width="46" height="46" rx="2" fill="rgba(0,0,0,0)" stroke="rgba(201,168,76,0.15)" stroke-width="1" stroke-dasharray="3,3"/>';
+    svg += '<text x="133" y="100" text-anchor="middle" font-size="6" fill="#444" font-family="system-ui" pointer-events="none">Coeur</text>';
     svg += '</g>';
 
-    /* Zone Centre avant */
-    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="centre">';
-    svg += '<rect x="60" y="100" width="80" height="72" rx="2" style="' + st(centre,gF,gS) + '"/>';
-    svg += '<text x="100" y="133" text-anchor="middle" font-size="8" fill="' + (centre?gS:'#555') + '" pointer-events="none" font-family="system-ui">Centre</text>';
-    svg += '<text x="100" y="145" text-anchor="middle" font-size="7" fill="' + (centre?gS:'#444') + '" pointer-events="none" font-family="system-ui">11 x 11"</text>';
-    if (centre) svg += '<text x="100" y="128" text-anchor="middle" font-size="10" fill="' + gS + '" pointer-events="none">✓</text>';
+    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="centre" style="cursor:pointer">';
+    svg += '<rect x="44" y="78" width="112" height="112" rx="2" fill="rgba(0,0,0,0)" stroke="rgba(201,168,76,0.15)" stroke-width="1" stroke-dasharray="3,3"/>';
+    svg += '<text x="100" y="196" text-anchor="middle" font-size="6" fill="#444" font-family="system-ui" pointer-events="none">Centre</text>';
     svg += '</g>';
 
-    /* ══ SEPARATEUR ══ */
+    /* ── SEPARATEUR ── */
     svg += '<line x1="20" y1="210" x2="180" y2="210" stroke="#2a2a2a" stroke-width="1"/>';
 
-    /* ══ ETIQUETTE ARRIERE ══ */
-    svg += '<text x="100" y="228" text-anchor="middle" font-size="9" fill="#555" font-family="system-ui" letter-spacing="2">ARRIERE</text>';
-
-    /* ══ VUE ARRIERE (y offset +215) ══ */
+    /* ── ARRIERE ── */
+    svg += '<text x="100" y="228" text-anchor="middle" font-size="8" fill="#555" font-family="system-ui" letter-spacing="2">ARRIERE</text>';
     var oy = 215;
-    /* Corps arriere */
     svg += '<path d="M55,' + (38+oy) + ' L14,' + (68+oy) + ' L30,' + (88+oy) + ' L30,' + (195+oy) + ' L170,' + (195+oy) + ' L170,' + (88+oy) + ' L186,' + (68+oy) + ' L145,' + (38+oy) + ' Q130,' + (20+oy) + ' 100,' + (20+oy) + ' Q70,' + (20+oy) + ' 55,' + (38+oy) + ' Z" fill="#252525" stroke="#3a3a3a" stroke-width="1.5"/>';
-    /* Col arriere */
     svg += '<path d="M80,' + (36+oy) + ' Q100,' + (44+oy) + ' 120,' + (36+oy) + '" fill="none" stroke="#444" stroke-width="1.5"/>';
+    svg += '<path d="M55,' + (38+oy) + ' L14,' + (68+oy) + ' L30,' + (88+oy) + ' L48,' + (75+oy) + ' Z" fill="rgba(255,255,255,0.03)" stroke="#3a3a3a" stroke-width="1.2"/>';
+    svg += '<path d="M145,' + (38+oy) + ' L186,' + (68+oy) + ' L170,' + (88+oy) + ' L152,' + (75+oy) + ' Z" fill="rgba(255,255,255,0.03)" stroke="#3a3a3a" stroke-width="1.2"/>';
 
-    /* Manches arriere */
-    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="manche">';
-    svg += '<path d="M55,' + (38+oy) + ' L14,' + (68+oy) + ' L30,' + (88+oy) + ' L48,' + (75+oy) + ' Z" style="' + st(manche,gF,gS) + '"/>';
-    svg += '<path d="M145,' + (38+oy) + ' L186,' + (68+oy) + ' L170,' + (88+oy) + ' L152,' + (75+oy) + ' Z" style="' + st(manche,gF,gS) + '"/>';
+    /* Zone arriere cliquable */
+    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="arriere" style="cursor:pointer">';
+    svg += '<rect x="44" y="' + (52+oy) + '" width="112" height="130" rx="2" fill="rgba(0,0,0,0)" stroke="rgba(74,120,201,0.2)" stroke-width="1" stroke-dasharray="3,3"/>';
     svg += '</g>';
 
-    /* Zone Arriere — grande zone dos */
-    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="arriere">';
-    svg += '<rect x="46" y="' + (52+oy) + '" width="108" height="120" rx="2" style="' + st(arriere,bF,bS) + '"/>';
-    svg += '<text x="100" y="' + (108+oy) + '" text-anchor="middle" font-size="8" fill="' + (arriere?bS:'#555') + '" pointer-events="none" font-family="system-ui">Arriere</text>';
-    svg += '<text x="100" y="' + (120+oy) + '" text-anchor="middle" font-size="7" fill="' + (arriere?bS:'#444') + '" pointer-events="none" font-family="system-ui">11 x 11"</text>';
-    if (arriere) svg += '<text x="100" y="' + (103+oy) + '" text-anchor="middle" font-size="10" fill="' + bS + '" pointer-events="none">✓</text>';
-    svg += '</g>';
+    /* Afficher chaque zone arriere cochee avec sa vraie taille */
+    Object.keys(ZONES_ARRIERE).forEach(function(key) {
+      if (!pos.includes(key)) return;
+      var z = ZONES_ARRIERE[key];
+      svg += '<rect x="' + z.x + '" y="' + z.y + '" width="' + z.w + '" height="' + z.h + '" rx="2"'
+        + ' fill="rgba(74,120,201,0.25)" stroke="' + z.color + '" stroke-width="1.5" pointer-events="none"/>';
+      svg += '<text x="' + (z.x + z.w/2) + '" y="' + (z.y + z.h/2 + 3) + '" text-anchor="middle"'
+        + ' font-size="6.5" fill="' + z.color + '" pointer-events="none" font-family="system-ui">' + z.label + '</text>';
+    });
+
+    /* Arriere texte indicateur si rien selectionne */
+    var arriereOn = pos.includes('arriere-petit') || pos.includes('arriere') || pos.includes('arriere-max');
+    if (!arriereOn) {
+      svg += '<text x="100" y="' + (108+oy) + '" text-anchor="middle" font-size="7" fill="#444" font-family="system-ui" pointer-events="none">Cliquer pour selectionner</text>';
+    }
 
     svg += '</svg>';
     return svg;
