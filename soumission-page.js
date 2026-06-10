@@ -90,22 +90,22 @@
   let panierItemEnCours = null;
 
   const PLACEMENTS_DTF = [
-    { value:'avant-coeur-petit',  label:'Avant — Cœur',   size:'4" × 2,5"',  price:2.00 },
-    { value:'avant-coeur',        label:'Avant — Cœur',   size:'4" × 4"',    price:2.00 },
-    { value:'avant-centre-petit', label:'Avant — Centré', size:'6" × 6"',    price:2.25 },
-    { value:'avant-centre-grand', label:'Avant — Centré', size:'11" × 11"',  price:7.00 },
-    { value:'avant-centre-max',   label:'Avant — Centré', size:'14" × 14"',  price:11.40 },
-    { value:'arriere-petit',      label:'Arrière',         size:'11" × 6,5"', price:3.75 },
-    { value:'arriere',            label:'Arrière',         size:'11" × 11"',  price:6.60 },
-    { value:'arriere-max',        label:'Arrière',         size:'14" × 14"',  price:11.40 },
-    { value:'manche-petit',       label:'Manche',          size:'11" × 2"',   price:2.00 },
-    { value:'manche-grand',       label:'Manche',          size:'11" × 3,5"', price:2.75 },
-    { value:'autre-dtf',          label:'Autre',           size:'Sur mesure', price:0 },
+    { value:'avant-coeur-petit',  label:'Avant — Cœur',   size:'4" × 2,5"',  price:2.00,  zone:'coeur' },
+    { value:'avant-coeur',        label:'Avant — Cœur',   size:'4" × 4"',    price:2.00,  zone:'coeur' },
+    { value:'avant-centre-petit', label:'Avant — Centré', size:'6" × 6"',    price:2.25,  zone:'centre' },
+    { value:'avant-centre-grand', label:'Avant — Centré', size:'11" × 11"',  price:7.00,  zone:'centre' },
+    { value:'avant-centre-max',   label:'Avant — Centré', size:'14" × 14"',  price:11.40, zone:'centre' },
+    { value:'arriere-petit',      label:'Arrière',         size:'11" × 6,5"', price:3.75,  zone:'arriere' },
+    { value:'arriere',            label:'Arrière',         size:'11" × 11"',  price:6.60,  zone:'arriere' },
+    { value:'arriere-max',        label:'Arrière',         size:'14" × 14"',  price:11.40, zone:'arriere' },
+    { value:'manche-petit',       label:'Manche',          size:'11" × 2"',   price:2.00,  zone:'manche' },
+    { value:'manche-grand',       label:'Manche',          size:'11" × 3,5"', price:2.75,  zone:'manche' },
+    { value:'autre-dtf',          label:'Autre',           size:'Sur mesure', price:0,     zone:'autre' },
   ];
 
   const PLACEMENTS_PATCH = [
-    { value:'patch-petit', label:'Patch cuir', size:'2,25" × 1,85"', price:7.30 },
-    { value:'patch-grand', label:'Patch cuir', size:'3" × 2,5"',     price:13.50 },
+    { value:'patch-petit', label:'Patch cuir', size:'2,25" × 1,85"', price:7.30,  zone:'coeur' },
+    { value:'patch-grand', label:'Patch cuir', size:'3" × 2,5"',     price:13.50, zone:'coeur' },
   ];
 
   /* ══════════════════════════════════════
@@ -493,16 +493,7 @@
     if (!d) return;
     const idx=d.positions.indexOf(posValue);
     if (idx>=0) d.positions.splice(idx,1); else d.positions.push(posValue);
-    // Màj visuel sans re-render complet
-    document.querySelectorAll(`[data-design="${designId}"]`).forEach(card=>{
-      card.classList.toggle('som-placement-card--checked',d.positions.includes(card.dataset.pos));
-    });
-    const countEl=document.getElementById('deco-pos-count-'+designId);
-    if (countEl) {
-      const n=d.positions.length;
-      countEl.textContent=n+' position'+(n>1?'s':'');
-      countEl.className='som-deco-counter'+(n>0?' ok':'');
-    }
+    renderDesigns();
     updateDecoValidation();
   }
 
@@ -557,8 +548,15 @@
           </div>`:''}
 
           <label class="som-label">Emplacements</label>
-          <p style="font-size:12px;color:var(--som-dim);margin-bottom:10px">Cochez toutes les positions où ce design doit apparaître.</p>
-          <div class="som-placements">${positionsHtml}</div>
+          <p style="font-size:12px;color:var(--som-dim);margin-bottom:10px">Cliquez sur le schéma ou cochez les cases.</p>
+          <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:4px">
+            <div style="flex-shrink:0;width:180px" id="svg-wrap-${design.id}">
+              ${buildTshirtSVG(design)}
+            </div>
+            <div style="flex:1;min-width:200px">
+              <div class="som-placements">${positionsHtml}</div>
+            </div>
+          </div>
 
           <div style="margin-top:16px">
             <label class="som-label">Logo pour ce design <span class="som-required">*</span></label>
@@ -574,6 +572,81 @@
         </div>`;
     }).join('');
     updateDecoValidation();
+  }
+
+  function buildTshirtSVG(design) {
+    var pos = design.positions;
+    var placements = design.type === 'patch' ? PLACEMENTS_PATCH : PLACEMENTS_DTF;
+    function zoneOn(zone) {
+      return placements.filter(function(p){return p.zone===zone;}).some(function(p){return pos.includes(p.value);});
+    }
+    var coeur   = zoneOn('coeur');
+    var centre  = zoneOn('centre');
+    var arriere = zoneOn('arriere');
+    var manche  = zoneOn('manche');
+    var gF = 'rgba(201,168,76,0.3)'; var gS = '#c9a84c';
+    var bF = 'rgba(74,120,201,0.3)'; var bS = '#4a78c9';
+    var oF = 'rgba(255,255,255,0.03)'; var oS = '#3a3a3a';
+    function st(on, fill, stroke) {
+      return 'fill:' + (on?fill:oF) + ';stroke:' + (on?stroke:oS) + ';stroke-width:1.2;cursor:pointer;';
+    }
+    var d = design.id;
+    var svg = '<svg viewBox="0 0 180 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;" data-design="' + d + '">';
+    svg += '<path d="M52,32 L16,58 L29,75 L29,185 L151,185 L151,75 L164,58 L128,32 Q115,16 90,16 Q65,16 52,32 Z" fill="#222" stroke="#3a3a3a" stroke-width="1.5"/>';
+    svg += '<path d="M70,30 Q90,46 110,30" fill="none" stroke="#3a3a3a" stroke-width="1.5"/>';
+    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="manche">';
+    svg += '<path d="M52,32 L16,58 L29,75 L46,64 Z" style="' + st(manche,gF,gS) + '"/>';
+    svg += '<path d="M128,32 L164,58 L151,75 L134,64 Z" style="' + st(manche,gF,gS) + '"/>';
+    if (manche) svg += '<text x="22" y="60" text-anchor="middle" font-size="8" fill="' + gS + '" pointer-events="none">✓</text>';
+    svg += '</g>';
+    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="coeur">';
+    svg += '<rect x="54" y="52" width="34" height="28" rx="2" style="' + st(coeur,gF,gS) + '"/>';
+    svg += '<text x="71" y="64" text-anchor="middle" font-size="7" fill="' + (coeur?gS:'#555') + '" pointer-events="none" font-family="system-ui">Coeur</text>';
+    svg += '<text x="71" y="73" text-anchor="middle" font-size="6" fill="' + (coeur?gS:'#444') + '" pointer-events="none" font-family="system-ui">4x4"</text>';
+    if (coeur) svg += '<text x="71" y="60" text-anchor="middle" font-size="8" fill="' + gS + '" pointer-events="none">✓</text>';
+    svg += '</g>';
+    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="centre">';
+    svg += '<rect x="62" y="88" width="56" height="55" rx="2" style="' + st(centre,gF,gS) + '"/>';
+    svg += '<text x="90" y="113" text-anchor="middle" font-size="7" fill="' + (centre?gS:'#555') + '" pointer-events="none" font-family="system-ui">Centre</text>';
+    svg += '<text x="90" y="123" text-anchor="middle" font-size="6" fill="' + (centre?gS:'#444') + '" pointer-events="none" font-family="system-ui">11x11"</text>';
+    if (centre) svg += '<text x="90" y="107" text-anchor="middle" font-size="8" fill="' + gS + '" pointer-events="none">✓</text>';
+    svg += '</g>';
+    svg += '<g class="som-svg-zone" data-design="' + d + '" data-zone="arriere">';
+    svg += '<rect x="62" y="150" width="56" height="26" rx="2" style="' + st(arriere,bF,bS) + '"/>';
+    svg += '<text x="90" y="161" text-anchor="middle" font-size="7" fill="' + (arriere?bS:'#555') + '" pointer-events="none" font-family="system-ui">Arriere</text>';
+    svg += '<text x="90" y="170" text-anchor="middle" font-size="6" fill="' + (arriere?bS:'#444') + '" pointer-events="none" font-family="system-ui">(dos)</text>';
+    if (arriere) svg += '<text x="90" y="158" text-anchor="middle" font-size="8" fill="' + bS + '" pointer-events="none">✓</text>';
+    svg += '</g>';
+    svg += '<text x="90" y="200" text-anchor="middle" font-size="6.5" fill="#444" font-family="system-ui">Cliquez une zone</text>';
+    svg += '</svg>';
+    return svg;
+  }
+
+  function toggleZoneSVG(designId, zone) {
+    if (!panierItemEnCours) return;
+    var d = panierItemEnCours.designs.find(function(d){return d.id===designId;});
+    if (!d) return;
+    var placements = d.type === 'patch' ? PLACEMENTS_PATCH : PLACEMENTS_DTF;
+    var keys = placements.filter(function(p){return p.zone===zone;}).map(function(p){return p.value;});
+    var anyActive = keys.some(function(k){return d.positions.includes(k);});
+    if (anyActive) {
+      d.positions = d.positions.filter(function(p){return !keys.includes(p);});
+    } else {
+      var defaultKey = keys[Math.min(1, keys.length-1)];
+      if (defaultKey && !d.positions.includes(defaultKey)) d.positions.push(defaultKey);
+    }
+    renderDesigns();
+    updateDecoValidation();
+  }
+
+  function initSVGClicks() {
+    document.addEventListener('click', function(e) {
+      var zone = e.target.closest('.som-svg-zone');
+      if (!zone) return;
+      var designId = zone.dataset.design;
+      var zoneName = zone.dataset.zone;
+      if (designId && zoneName) toggleZoneSVG(designId, zoneName);
+    });
   }
 
   function buildLogoUploadHtml(design) {
@@ -1063,6 +1136,7 @@
     renderSousCats();
     renderCatalogue();
     initForm();
+    initSVGClicks();
   });
 
   /* ── API publique ── */
@@ -1070,7 +1144,7 @@
     goPage, setPerPage, setSearch, clearSearch,
     openModal, openModalIdx, closeModal, selectSwatch, setMainImg, choisirProduit,
     goStep, retourCatalogue, retourPanier,
-    addDesign, removeDesign, updateDesignType, togglePosition,
+    addDesign, removeDesign, updateDesignType, togglePosition, toggleZoneSVG,
     handleFileDesign, clearLogoDesign, dragOverDesign, dragLeaveDesign, dropFileDesign,
     updateDesignNotes,
     addColorBlock, removeColorBlock, updateColor, updateQty,
