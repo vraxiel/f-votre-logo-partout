@@ -90,11 +90,11 @@ get_header(); ?>
        <div class="som-deco-info-box som-deco-info-box--collapsible" id="som-deco-toggle">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <div style="flex:1">
-            <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="document.getElementById('som-deco-toggle').classList.toggle('som-deco-open')">
+            <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="var b=this.closest('#som-deco-toggle').querySelector('.som-deco-body');b.style.display=b.style.display==='none'?'block':'none';">
               <strong>Pourquoi un minimum de 12 impressions ?</strong>
               <svg class="som-deco-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="som-deco-body">
+            <div class="som-deco-body" style="display:none">
               <p>Chaque fois que votre logo est imprimé sur un vêtement, ça compte comme <strong>1 impression</strong>. Le minimum de 12 s'applique par design — c'est-à-dire par fichier logo de <strong>même grandeur et même format</strong>.</p>
               <p style="margin-top:8px"><strong>Exemples :</strong><br>
               • 12 t-shirts · logo avant centré 11×11" = <strong>12 impressions ✓</strong><br>
