@@ -87,11 +87,22 @@ get_header(); ?>
           </div>
         </div>
 
-        <div class="som-deco-info-box">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div>
-            <strong>Comment fonctionne le minimum de 12 ?</strong>
-            <p>Le minimum de 12 s'applique par <em>design unique</em>. Si vous avez 6 articles avec le logo en avant ET en arrière, cela donne 6 × 2 = <strong>12 impressions</strong> — le minimum est atteint.</p>
+       <div class="som-deco-info-box som-deco-info-box--collapsible" id="som-deco-toggle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="this.parentNode.parentNode.classList.toggle('som-deco-open')">
+              <strong>Pourquoi un minimum de 12 impressions ?</strong>
+              <svg class="som-deco-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="som-deco-body">
+              <p>Chaque fois que votre logo est imprimé sur un vêtement, ça compte comme <strong>1 impression</strong>. Le minimum de 12 s'applique par design — c'est-à-dire par fichier logo de <strong>même grandeur et même format</strong>.</p>
+              <p style="margin-top:8px"><strong>Exemples :</strong><br>
+              • 12 t-shirts · logo avant centré 11×11" = <strong>12 impressions ✓</strong><br>
+              • 6 t-shirts · logo avant 11×11" + logo arrière 11×11" = 6 × 2 = <strong>12 impressions ✓</strong><br>
+              • 6 t-shirts · logo avant 4×4" + logo arrière 11×11" = <strong>2 designs séparés</strong> — chacun doit atteindre 12 impressions</p>
+              <p style="margin-top:8px"><strong>Important :</strong> Dans un même design, toutes les positions doivent utiliser la <strong>même taille d'impression</strong>. Un logo 4×4" et un logo 11×11" ne peuvent pas faire partie du même design — ce sont deux grandeurs différentes, donc deux fichiers différents.</p>
+              <p style="margin-top:8px">Vous pouvez ajouter un <strong>second design</strong> pour un deuxième logo ou une deuxième taille. Chaque design suit la même règle : minimum 12 impressions, même grandeur et même format pour toutes les positions choisies.</p>
+            </div>
           </div>
         </div>
 
