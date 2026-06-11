@@ -439,11 +439,24 @@
 .som-deco-chevron { transition: transform 0.2s; flex-shrink: 0; }
 .som-deco-info-box--collapsible.som-deco-open .som-deco-chevron { transform: rotate(180deg);}
    
-.som-input:-webkit-autofill,
-.som-input:-webkit-autofill:hover,
-.som-input:-webkit-autofill:focus,
-.som-textarea:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0px 1000px var(--som-surface2) inset !important;
-  -webkit-text-fill-color: var(--som-text) !important;
-  caret-color: var(--som-text);
+/* Champs formulaire — fond blanc texte sombre uniforme */
+.som-page input[type="text"],
+.som-page input[type="email"],
+.som-page input[type="tel"],
+.som-page select,
+.som-page textarea {
+  background-color: #fff !important;
+  color: #111 !important;
+  border: 1px solid #ccc !important;
+
+.som-page input[type="text"]:focus,
+.som-page input[type="email"]:focus,
+.som-page input[type="tel"]:focus,
+.som-page select:focus,
+.som-page textarea:focus {
+  background-color: #fff !important;
+  color: #111 !important;
+  border-color: var(--som-gold) !important;
+  outline: none !important;
+}
 }
