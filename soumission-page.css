@@ -368,7 +368,7 @@
 .som-input { width: 100%; padding: 10px 12px; background: var(--som-surface2); border: 1px solid var(--som-border2); color: var(--som-text); font-size: 14px; font-family: var(--som-font-body); box-sizing: border-box; transition: border-color 0.2s; border-radius: var(--som-radius); }
 .som-input:focus { outline: none; border-color: var(--som-gold); }
 .som-input--color { flex: 1; }
-.som-textarea { width: 100%; padding: 10px 12px; background: var(--som-surface2); border: 1px solid var(--som-border2); color: var(--som-text); font-size: 14px; font-family: var(--som-font-body); resize: vertical; box-sizing: border-box; border-radius: var(--som-radius); }
+.som-textarea:focus { background: var(--som-surface2); color: var(--som-text); } .som-input:focus { background: var(--som-surface2); color: var(--som-text); } font-size: 14px; font-family: var(--som-font-body); resize: vertical; box-sizing: border-box; border-radius: var(--som-radius); }
 .som-textarea:focus { outline: none; border-color: var(--som-gold); }
 .som-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .som-field-group { display: flex; flex-direction: column; }
