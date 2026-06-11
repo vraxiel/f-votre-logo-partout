@@ -438,5 +438,12 @@
 .som-deco-info-box--collapsible.som-deco-open .som-deco-body { display: block; }
 .som-deco-chevron { transition: transform 0.2s; flex-shrink: 0; }
 .som-deco-info-box--collapsible.som-deco-open .som-deco-chevron { transform: rotate(180deg);}
-
+   
+.som-input:-webkit-autofill,
+.som-input:-webkit-autofill:hover,
+.som-input:-webkit-autofill:focus,
+.som-textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px var(--som-surface2) inset !important;
+  -webkit-text-fill-color: var(--som-text) !important;
+  caret-color: var(--som-text);
 }
