@@ -433,4 +433,10 @@
   .som-placements { grid-template-columns: 1fr 1fr; }
   .som-panier-footer { flex-direction: column; }
   .som-panier-footer .som-btn { width: 100%; justify-content: center; }
+
+.som-deco-info-box--collapsible .som-deco-body { display: none; margin-top: 10px; }
+.som-deco-info-box--collapsible.som-deco-open .som-deco-body { display: block; }
+.som-deco-chevron { transition: transform 0.2s; flex-shrink: 0; }
+.som-deco-info-box--collapsible.som-deco-open .som-deco-chevron { transform: rotate(180deg);}
+
 }
