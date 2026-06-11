@@ -570,7 +570,7 @@
           +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0293a" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
           +'<span>Les emplacements en rouge sont déjà utilisés par un autre design. Chaque emplacement ne peut être utilisé que par un seul design à la fois.</span></div>'
         : '';
-      const positionsHtml=msgIncompat+msgDejaUtilise+placements.map(p=>{
+      const positionsHtml=placements.map(p=>{
         const checked=design.positions.includes(p.value);
         const incompatibleTaille=groupeActif&&p.groupe!=='autre'&&p.groupe!==groupeActif&&!checked;
         const dejaUtilise=!checked&&zonesDejaUtilisees.has(p.zone)&&p.zone!=='autre';
@@ -619,9 +619,9 @@
         +'<p style="font-size:12px;color:var(--som-dim);margin-bottom:10px">'+( isCasquette?'Choisissez la zone souhaitée.':'Cliquez sur le schéma ou cochez les cases.')+'</p>'
         +(svgHtml?'<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:4px">'
           +'<div style="flex-shrink:0;width:200px">'+svgHtml+'</div>'
-          +'<div style="flex:1;min-width:200px"><div class="som-placements">'+positionsHtml+'</div></div>'
+          +'<div style="flex:1;min-width:200px">'+msgIncompat+msgDejaUtilise+'<div class="som-placements">'+positionsHtml+'</div></div>'
           +'</div>'
-          :'<div class="som-placements">'+positionsHtml+'</div>')
+          :msgIncompat+msgDejaUtilise+'<div class="som-placements">'+positionsHtml+'</div>')
         +notePositionHtml
         +'<div style="margin-top:16px"><label class="som-label">Logo pour ce design <span class="som-required">*</span></label>'+logoHtml+'</div>'
         +'<div class="som-field-group" style="margin-top:10px">'
