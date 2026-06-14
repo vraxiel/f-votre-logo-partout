@@ -124,7 +124,11 @@ def get_stock_warehouse(product_id, color_id):
             warehouse_id = inp.get("warehouse-id", "").lower()
             is_dropship = "dropship" in warehouse or "dropship" in warehouse_id
             size = size_span.text.strip()
-            qty  = int(inp.get("data-max", 0) or 0)
+            raw_max = inp.get("data-max", "0") or "0"
+            try:
+                qty = int(raw_max)
+            except (ValueError, TypeError):
+                qty = 0
             if is_dropship:
                 stock_dropship[size] = stock_dropship.get(size, 0) + qty
             else:
@@ -180,7 +184,14 @@ def get_produit(sku):
     if not product:
         return jsonify({"erreur": f"Produit {sku} introuvable"}), 404
 
-    url_key = product.get("url_key") or product.get("url", "").rstrip("/").split("/")[-1].replace(".html", "")
+    raw_url = product.get("url", "")
+    if raw_url:
+        # Extraire tout le chemin après /fr/ sans l'extension .html
+        import re as _re
+        m = _re.search(r'/fr/(.+?)(?:\.html)?$', raw_url)
+        url_key = product.get("url_key") or (m.group(1) if m else raw_url.rstrip("/").split("/")[-1].replace(".html", ""))
+    else:
+        url_key = product.get("url_key", "")
     couleurs, tailles, product_id, _ = scrape_produit_live(url_key)
 
     stock_par_couleur = {}
@@ -270,7 +281,14 @@ def get_stock_couleur(sku, couleur_idx):
     if not product:
         return jsonify({"erreur": f"Produit {sku} introuvable"}), 404
 
-    url_key = product.get("url_key") or product.get("url", "").rstrip("/").split("/")[-1].replace(".html", "")
+    raw_url = product.get("url", "")
+    if raw_url:
+        # Extraire tout le chemin après /fr/ sans l'extension .html
+        import re as _re
+        m = _re.search(r'/fr/(.+?)(?:\.html)?$', raw_url)
+        url_key = product.get("url_key") or (m.group(1) if m else raw_url.rstrip("/").split("/")[-1].replace(".html", ""))
+    else:
+        url_key = product.get("url_key", "")
     couleurs, tailles, product_id, _ = scrape_produit_live(url_key)
 
     if not product_id or couleur_idx >= len(couleurs):

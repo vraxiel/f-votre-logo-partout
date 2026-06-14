@@ -395,7 +395,6 @@
         modalProduit.hasDropship = d.has_dropship || false;
         renderStockTailles(nomCouleur, idx);
         renderModalSwatches(modalProduit.couleurs, modalProduit.couleurs.find(c=>c.nom===nomCouleur));
-        if (el) el.innerHTML='<span style="color:#888;font-size:0.85rem">Stock non disponible</span>';
       });
   }
 
