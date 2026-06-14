@@ -1,2 +1,8 @@
 wp-config.php
 .env
+backup-*/
+*.v5-backup.*
+*.v7-*.js
+*.v7-*.css
+*.backup.js
+*.backup2.js
