@@ -389,10 +389,12 @@
         }
         const d = data.data;
         if (!modalProduit.stockLive) modalProduit.stockLive = {};
+        if (!modalProduit.stockDropship) modalProduit.stockDropship = {};
         modalProduit.stockLive[idx] = d.stock || {};
+        modalProduit.stockDropship[idx] = d.stock_dropship || {};
+        modalProduit.hasDropship = d.has_dropship || false;
         renderStockTailles(nomCouleur, idx);
         renderModalSwatches(modalProduit.couleurs, modalProduit.couleurs.find(c=>c.nom===nomCouleur));
-      }).catch(()=>{
         if (el) el.innerHTML='<span style="color:#888;font-size:0.85rem">Stock non disponible</span>';
       });
   }
@@ -435,28 +437,34 @@
       el.innerHTML='<span style="color:#888;font-size:0.85rem">Chargement du stock…</span>';
       return;
     }
-    const stockCouleur = getStockParCouleur(nomCouleur) || {};
-    if (Object.keys(stockCouleur).length === 0) {
+    const ordre = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL','OS'];
+    const stockPhysique = getStockParCouleur(nomCouleur) || {};
+    const stockDropship = (modalProduit.stockDropship && modalProduit.stockDropship[idx]) || {};
+    const hasPhysique = Object.keys(stockPhysique).length > 0;
+    const hasDropship = Object.keys(stockDropship).length > 0;
+    if (!hasPhysique && !hasDropship) {
       el.innerHTML='<span style="color:#cc4444;font-size:0.85rem">Épuisé</span>';
       return;
     }
-    const ordre = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
-    const tailles = Object.keys(stockCouleur).sort((a,b)=>{
-      const ia=ordre.indexOf(a), ib=ordre.indexOf(b);
-      return (ia===-1?99:ia)-(ib===-1?99:ib);
-    });
-    el.innerHTML = '<div class="som-stock-tailles" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.4rem;">'
-      + tailles.map(t=>{
-          const qty = stockCouleur[t] || 0;
-          const cls = qty===0 ? 'som-stock-taille--out' : qty<=50 ? 'som-stock-taille--low' : 'som-stock-taille--ok';
-          const msg = qty===0 ? 'Épuisé' : qty+'';
-          return '<div class="som-stock-taille '+cls+(qty===0?' som-stock-taille--disabled':'')+'" style="display:flex;flex-direction:column;align-items:center;padding:0.4rem 0.6rem;border-radius:6px;min-width:52px;text-align:center;border:1px solid rgba(255,255,255,0.15);">'
-            +'<span class="som-stock-taille__label">'+t+'</span>'
-            +'<span class="som-stock-taille__qty">'+msg+'</span>'
-            +'</div>';
-        }).join('')
-      +'</div>'
-      +'';  // note stock retirée
+    var html = '';
+    if (hasPhysique) {
+      var tP = Object.keys(stockPhysique).sort((a,b)=>{ var ia=ordre.indexOf(a),ib=ordre.indexOf(b); return (ia===-1?99:ia)-(ib===-1?99:ib); });
+      html += '<p style="font-size:0.75rem;color:#888;margin:0.5rem 0 0.25rem;">📦 Stock disponible</p>';
+      html += '<div style="display:flex;flex-direction:row;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.4rem;">';
+      html += tP.map(function(t){ var qty=stockPhysique[t]||0; var cls=qty===0?'som-stock-taille--out':qty<=50?'som-stock-taille--low':'som-stock-taille--ok'; var msg=qty===0?'Épuisé':qty+''; return '<div class="som-stock-taille '+cls+(qty===0?' som-stock-taille--disabled':'')+'" style="display:flex;flex-direction:column;align-items:center;padding:0.4rem 0.6rem;border-radius:6px;min-width:52px;text-align:center;border:1px solid rgba(255,255,255,0.15);"><span class="som-stock-taille__label">'+t+'</span><span class="som-stock-taille__qty">'+msg+'</span></div>'; }).join('');
+      html += '</div>';
+    } else {
+      html += '<p style="font-size:0.85rem;color:#cc4444;margin:0.25rem 0;">📦 Épuisé en entrepôt</p>';
+    }
+    if (hasDropship) {
+      var tD = Object.keys(stockDropship).sort((a,b)=>{ var ia=ordre.indexOf(a),ib=ordre.indexOf(b); return (ia===-1?99:ia)-(ib===-1?99:ib); });
+      html += '<p style="font-size:0.75rem;color:#888;margin:0.5rem 0 0.25rem;">🔄 Sur commande</p>';
+      html += '<div style="display:flex;flex-direction:row;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.4rem;">';
+      html += tD.map(function(t){ var qty=stockDropship[t]||0; var cls=qty===0?'som-stock-taille--out':'som-stock-taille--low'; var msg=qty===0?'Épuisé':qty+''; return '<div class="som-stock-taille '+cls+(qty===0?' som-stock-taille--disabled':'')+'" style="display:flex;flex-direction:column;align-items:center;padding:0.4rem 0.6rem;border-radius:6px;min-width:52px;text-align:center;border:1px solid rgba(255,255,255,0.15);"><span class="som-stock-taille__label">'+t+'</span><span class="som-stock-taille__qty">'+msg+'</span></div>'; }).join('');
+      html += '</div>';
+      html += '<p class="som-stock-dropship">Les délais de livraison sur commande peuvent varier — contactez-nous pour confirmer la disponibilité.</p>';
+    }
+    el.innerHTML = html;
   }
 
   function selectSwatch(nomCouleur) {

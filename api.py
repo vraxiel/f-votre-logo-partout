@@ -114,16 +114,26 @@ def get_stock_warehouse(product_id, color_id):
         if not html:
             return {}
         soup = BeautifulSoup(html, "html.parser")
-        # Additionner le stock de tous les entrepots par taille
-        stock_total = {}
+        stock_physique = {}
+        stock_dropship = {}
         for inp in soup.select("li.ai_store1 input.qty"):
             size_span = inp.find_parent("li").find("span", class_="size")
             if not size_span:
                 continue
-            size  = size_span.text.strip()
-            qty   = int(inp.get("data-max", 0) or 0)
-            stock_total[size] = stock_total.get(size, 0) + qty
-        return stock_total
+            warehouse = inp.get("warehouse", "").lower()
+            warehouse_id = inp.get("warehouse-id", "").lower()
+            is_dropship = "dropship" in warehouse or "dropship" in warehouse_id
+            size = size_span.text.strip()
+            qty  = int(inp.get("data-max", 0) or 0)
+            if is_dropship:
+                stock_dropship[size] = stock_dropship.get(size, 0) + qty
+            else:
+                stock_physique[size] = stock_physique.get(size, 0) + qty
+        return {
+            "stock": stock_physique,
+            "stock_dropship": stock_dropship,
+            "has_dropship": len(stock_dropship) > 0
+        }
     except Exception:
         return {}
 
@@ -175,7 +185,8 @@ def get_produit(sku):
 
     stock_par_couleur = {}
     for couleur in couleurs:
-        stock_par_couleur[couleur["label"]] = get_stock_warehouse(product_id, couleur["id"])
+        result = get_stock_warehouse(product_id, couleur["id"])
+        stock_par_couleur[couleur["label"]] = result.get("stock", {}) if isinstance(result, dict) else result
 
     return jsonify({
         **product,
@@ -266,11 +277,16 @@ def get_stock_couleur(sku, couleur_idx):
         return jsonify({"stock": {}, "tailles": []})
 
     couleur = couleurs[couleur_idx]
-    stock = get_stock_warehouse(product_id, couleur["id"])
+    result = get_stock_warehouse(product_id, couleur["id"])
+    stock = result.get("stock", {}) if isinstance(result, dict) else result
+    stock_dropship = result.get("stock_dropship", {}) if isinstance(result, dict) else {}
+    has_dropship = result.get("has_dropship", False) if isinstance(result, dict) else False
     return jsonify({
         "couleur_idx": couleur_idx,
         "couleur_label": couleur["label"],
         "stock": stock,
+        "stock_dropship": stock_dropship,
+        "has_dropship": has_dropship,
         "tailles": tailles,
     })
 
