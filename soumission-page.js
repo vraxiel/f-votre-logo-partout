@@ -1147,7 +1147,7 @@
         });
       });
       try {
-        const r=await fetch(form.action,{method:'POST',body:fd});
+        const r=await fetch(AJAX,{method:'POST',body:fd});
         const data=await r.json();
         if (data.success) {
           document.querySelectorAll('.som-panel').forEach(p=>p.classList.remove('active'));

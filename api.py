@@ -143,11 +143,11 @@ def get_produits():
 
     cat_parent = request.args.get("cat_parent")
     if cat_parent:
-        products = [p for p in products if p.get("cat_parent") == cat_parent]
+        products = [p for p in products if cat_parent in (p.get("cat_parent") or [])]
 
     cat_enfant = request.args.get("cat_enfant")
     if cat_enfant:
-        products = [p for p in products if p.get("cat_enfant") == cat_enfant]
+        products = [p for p in products if cat_enfant in (p.get("cat_enfant") or [])]
 
     vedette = request.args.get("vedette")
     if vedette == "true":
