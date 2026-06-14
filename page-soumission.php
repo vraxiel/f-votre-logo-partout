@@ -11,6 +11,8 @@ get_header(); ?>
   <section class="som-hero">
     <div class="som-hero__inner">
       <div class="som-hero__text">
+        <?php $logo_url = get_stylesheet_directory_uri() . '/assets/img/logo-f.png'; ?>
+        <img src="<?php echo esc_url( $logo_url ); ?>" alt="F - Votre Logo Partout" class="f-home-logo">
         <span class="som-hero__eyebrow">Impression personnalisée · DTF · Broderie</span>
         <h1>Votre logo.<br><em>Partout.</em></h1>
         <p>Choisissez votre article, configurez votre commande et recevez votre soumission sous 24&nbsp;h.</p>

@@ -571,3 +571,27 @@ function soumission_flask_proxy() {
 
     wp_send_json_success( $data );
 }
+
+/* =====================================================
+   FAVICON & LOGO
+===================================================== */
+add_action( 'wp_head', 'f_custom_favicon' );
+function f_custom_favicon() {
+    $logo_url = get_stylesheet_directory_uri() . '/assets/img/logo-f.png';
+    echo '<link rel="icon" type="image/png" href="' . esc_url( $logo_url ) . '">' . "\n";
+    echo '<link rel="shortcut icon" type="image/png" href="' . esc_url( $logo_url ) . '">' . "\n";
+}
+
+add_action( 'wp_head', 'f_homepage_logo_css' );
+function f_homepage_logo_css() {
+    if ( ! is_front_page() ) return;
+    $logo_url = get_stylesheet_directory_uri() . '/assets/img/logo-f.png';
+    echo '<style>
+    .f-home-logo {
+        display: block;
+        margin: 0 auto 2rem auto;
+        max-width: 180px;
+        width: 100%;
+    }
+    </style>' . "\n";
+}

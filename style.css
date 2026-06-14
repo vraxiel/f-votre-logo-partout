@@ -1,0 +1,53 @@
+/*
+Theme Name: Storefront Child
+Theme URI: 
+Description: Thème enfant de Storefront pour F - Votre logo partout
+Author: F - Votre logo partout
+Template: storefront
+Version: 1.0.0
+*/
+
+/* Cacher panier et recherche WooCommerce dans le header */
+.site-header .cart-contents,
+.site-header .site-search,
+.storefront-handheld-footer-bar .cart,
+.storefront-handheld-footer-bar .search,
+header.site-header .widget_shopping_cart,
+.site-header-cart,
+header .woocommerce-product-search {
+    display: none !important;
+}
+
+/* Cacher le header complet sur la page d'accueil */
+.home .site-header {
+    display: none !important;
+}
+
+.f-home-logo {
+    display: block;
+    margin: 0 0 2rem 0;
+    max-width: 120px;
+    width: 100%;
+}
+
+.som-hero__text .f-home-logo {
+    display: block !important;
+    margin: 0 0 2rem 0 !important;
+    max-width: 120px !important;
+}
+
+.som-hero__text .f-home-logo {
+    max-width: 200px !important;
+}
+
+.som-hero__text .f-home-logo {
+    margin-left: -8px !important;
+}
+
+.som-hero__text .f-home-logo {
+    margin-left: 0px !important;
+}
+
+.som-hero__text .f-home-logo {
+    max-width: 100px !important;
+}
