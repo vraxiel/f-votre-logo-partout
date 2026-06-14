@@ -560,7 +560,7 @@ function soumission_flask_proxy() {
         $url .= '?' . $query_string;
     }
 
-    $response = wp_remote_get( $url, array( 'timeout' => 10 ) );
+    $response = wp_remote_get( $url, array( 'timeout' => 60 ) );
 
     if ( is_wp_error( $response ) ) {
         wp_send_json_error( $response->get_error_message() );

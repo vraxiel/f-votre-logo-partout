@@ -309,6 +309,7 @@ get_header(); ?>
         <p id="modal-couleur-nom" class="som-modal__couleur-nom"></p>
         <div class="som-modal__swatches" id="modal-swatches"></div>
         <div id="modal-dispo"></div>
+        <div id="modal-stock-tailles" class="som-modal__stock-tailles"><span style="color:#888;font-size:0.85rem">Chargement du stock…</span></div>
         <button class="som-btn som-btn--primary som-modal__cta" onclick="SOM.choisirProduit()">
           Demander une soumission
         </button>

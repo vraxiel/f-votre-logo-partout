@@ -525,3 +525,14 @@
   color: #888;
   margin: 0.25rem 0 0;
 }
+
+.som-stock-dropship {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  color: #ffb74d;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
