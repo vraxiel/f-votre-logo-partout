@@ -459,3 +459,69 @@
   outline: none !important;
 }
 }
+
+/* ── Stock live ── */
+.som-stock-dot {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.3);
+  z-index: 2;
+}
+.som-stock-dot--ok  { background: #4caf50; }
+.som-stock-dot--low { background: #ff9800; }
+.som-stock-dot--out { background: #f44336; }
+
+.som-modal__stock-tailles {
+  margin-top: 0.75rem;
+}
+
+.som-modal__stock-tailles, .som-stock-tailles {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.som-stock-taille {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  min-width: 48px;
+  text-align: center;
+}
+
+.som-stock-taille__label {
+  font-weight: 700;
+  font-size: 0.82rem;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  width: 100%;
+  text-align: center;
+  padding-bottom: 0.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.som-stock-taille__qty {
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.som-stock-taille--ok       { background: rgba(76,175,80,0.15);  color: #81c784; border-color: rgba(76,175,80,0.3); }
+.som-stock-taille--low      { background: rgba(255,152,0,0.15);  color: #ffb74d; border-color: rgba(255,152,0,0.3); }
+.som-stock-taille--out      { background: rgba(244,67,54,0.10);  color: #e57373; border-color: rgba(244,67,54,0.2); }
+.som-stock-taille--disabled { opacity: 0.5; text-decoration: line-through; }
+
+.som-stock-note {
+  font-size: 0.72rem;
+  color: #888;
+  margin: 0.25rem 0 0;
+}

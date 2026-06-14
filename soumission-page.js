@@ -340,7 +340,7 @@
   }
 
   function openModal(idx,name,sku,image,couleurs,tailles) {
-    modalProduit={idx,name,sku,image,couleurs,tailles:tailles||[]};
+    modalProduit={idx,name,sku,image,couleurs,tailles:tailles||[],stockLive:{},couleursLive:[]};
     document.getElementById('modal-nom').textContent=name;
     document.getElementById('modal-sku').textContent='SKU : '+sku;
     const premiereDispo=couleurs.find(c=>c.disponible)||couleurs[0];
@@ -348,6 +348,9 @@
     renderModalSwatches(couleurs,premiereDispo);
     document.getElementById('som-modal-overlay').classList.add('active');
     document.body.style.overflow='hidden';
+    // Charger le stock de la première couleur disponible
+    const idxDispo = couleurs.indexOf(premiereDispo);
+    chargerStockCouleur(sku, idxDispo >= 0 ? idxDispo : 0, premiereDispo?.nom||'');
   }
 
   function closeModal(e) {
@@ -374,14 +377,86 @@
       :'<span style="color:#cc4444;font-weight:500">Rupture de stock</span>';
   }
 
+  function chargerStockCouleur(sku, idx, nomCouleur) {
+    const el = document.getElementById('modal-stock-tailles');
+    if (el) el.innerHTML='<span style="color:#888;font-size:0.85rem">Chargement du stock…</span>';
+    fetch(AJAX+'?action=flask_proxy&endpoint=stock/'+sku+'/'+idx)
+      .then(r=>r.json())
+      .then(data=>{
+        if (!data.success) {
+          if (el) el.innerHTML='<span style="color:#888;font-size:0.85rem">Stock non disponible</span>';
+          return;
+        }
+        const d = data.data;
+        if (!modalProduit.stockLive) modalProduit.stockLive = {};
+        modalProduit.stockLive[idx] = d.stock || {};
+        renderStockTailles(nomCouleur, idx);
+        renderModalSwatches(modalProduit.couleurs, modalProduit.couleurs.find(c=>c.nom===nomCouleur));
+      }).catch(()=>{
+        if (el) el.innerHTML='<span style="color:#888;font-size:0.85rem">Stock non disponible</span>';
+      });
+  }
+
+  function getStockParCouleur(nomCouleur) {
+    if (!modalProduit?.stockLive) return null;
+    const idx = modalProduit.couleurs.findIndex(c=>c.nom===nomCouleur);
+    if (idx === -1) return null;
+    const stock = modalProduit.stockLive[idx];
+    if (!stock || Array.isArray(stock)) return {};
+    return stock;
+  }
+
+  function getStockIndicateur(nomCouleur) {
+    if (!modalProduit?.stockLive) return '';
+    const stock = getStockParCouleur(nomCouleur);
+    if (stock === null) return '';
+    const total = Object.values(stock).reduce((a,b)=>a+b,0);
+    if (total === 0) return '<span class="som-stock-dot som-stock-dot--out" title="Épuisé"></span>';
+    if (total <= 50) return '<span class="som-stock-dot som-stock-dot--low" title="Stock limité"></span>';
+    return '<span class="som-stock-dot som-stock-dot--ok" title="En stock"></span>';
+  }
+
   function renderModalSwatches(couleurs,active) {
     document.getElementById('modal-swatches').innerHTML=couleurs.map(c=>{
       const img=c.images?.[0]||'';
+      const dot=getStockIndicateur(c.nom);
       return '<div class="som-modal__swatch'+(c.nom===active?.nom?' active':'')+(c.disponible?'':' som-modal__swatch--out')+'"'
-        +' title="'+c.nom+'" onclick="SOM.selectSwatch(this.title)" style="background:#f5f5f5;overflow:hidden;">'
+        +' title="'+c.nom+'" onclick="SOM.selectSwatch(this.title)" style="background:#f5f5f5;overflow:hidden;position:relative;">'
         +(img?'<img src="'+img+'" alt="'+c.nom+'" style="width:100%;height:100%;object-fit:cover;">':'')
+        +dot
         +'</div>';
     }).join('');
+  }
+
+  function renderStockTailles(nomCouleur, idx) {
+    const el = document.getElementById('modal-stock-tailles');
+    if (!el) return;
+    if (!modalProduit?.stockLive || Object.keys(modalProduit.stockLive).length === 0) {
+      el.innerHTML='<span style="color:#888;font-size:0.85rem">Chargement du stock…</span>';
+      return;
+    }
+    const stockCouleur = getStockParCouleur(nomCouleur) || {};
+    if (Object.keys(stockCouleur).length === 0) {
+      el.innerHTML='<span style="color:#cc4444;font-size:0.85rem">Épuisé</span>';
+      return;
+    }
+    const ordre = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
+    const tailles = Object.keys(stockCouleur).sort((a,b)=>{
+      const ia=ordre.indexOf(a), ib=ordre.indexOf(b);
+      return (ia===-1?99:ia)-(ib===-1?99:ib);
+    });
+    el.innerHTML = '<div class="som-stock-tailles" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.4rem;">'
+      + tailles.map(t=>{
+          const qty = stockCouleur[t] || 0;
+          const cls = qty===0 ? 'som-stock-taille--out' : qty<=50 ? 'som-stock-taille--low' : 'som-stock-taille--ok';
+          const msg = qty===0 ? 'Épuisé' : qty+'';
+          return '<div class="som-stock-taille '+cls+(qty===0?' som-stock-taille--disabled':'')+'" style="display:flex;flex-direction:column;align-items:center;padding:0.4rem 0.6rem;border-radius:6px;min-width:52px;text-align:center;border:1px solid rgba(255,255,255,0.15);">'
+            +'<span class="som-stock-taille__label">'+t+'</span>'
+            +'<span class="som-stock-taille__qty">'+msg+'</span>'
+            +'</div>';
+        }).join('')
+      +'</div>'
+      +'';  // note stock retirée
   }
 
   function selectSwatch(nomCouleur) {
@@ -390,6 +465,13 @@
     if (!couleur) return;
     renderModalCouleur(couleur);
     document.querySelectorAll('.som-modal__swatch').forEach(s=>s.classList.toggle('active',s.title===nomCouleur));
+    const idx = modalProduit.couleurs.findIndex(c=>c.nom===nomCouleur);
+    // Si déjà en cache, afficher directement
+    if (modalProduit.stockLive && modalProduit.stockLive[idx] !== undefined) {
+      renderStockTailles(nomCouleur, idx);
+    } else {
+      chargerStockCouleur(modalProduit.sku, idx, nomCouleur);
+    }
   }
 
   function setMainImg(thumbEl,url) {

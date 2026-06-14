@@ -247,5 +247,32 @@ def get_categories_menu():
     categories.sort(key=lambda c: c.get("ordre", 99))
     return jsonify(categories)
 
+
+@app.route("/api/stock/<sku>/<int:couleur_idx>")
+def get_stock_couleur(sku, couleur_idx):
+    """
+    Retourne le stock live pour une seule couleur d'un produit.
+    Plus rapide que /api/produit/<sku> qui charge toutes les couleurs.
+    """
+    products = load_products()
+    product = next((p for p in products if p.get("sku") == sku), None)
+    if not product:
+        return jsonify({"erreur": f"Produit {sku} introuvable"}), 404
+
+    url_key = product.get("url_key") or product.get("url", "").rstrip("/").split("/")[-1].replace(".html", "")
+    couleurs, tailles, product_id, _ = scrape_produit_live(url_key)
+
+    if not product_id or couleur_idx >= len(couleurs):
+        return jsonify({"stock": {}, "tailles": []})
+
+    couleur = couleurs[couleur_idx]
+    stock = get_stock_warehouse(product_id, couleur["id"])
+    return jsonify({
+        "couleur_idx": couleur_idx,
+        "couleur_label": couleur["label"],
+        "stock": stock,
+        "tailles": tailles,
+    })
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
