@@ -536,3 +536,63 @@
   font-size: 0.82rem;
   line-height: 1.5;
 }
+
+/* ── Panel 2 swatches couleur ── */
+.som-p2-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0;
+}
+.som-p2-swatch {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+  overflow: hidden !important;
+  flex-shrink: 0;
+}
+.som-p2-swatch img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+.som-p2-swatch--active {
+  border-color: var(--som-gold) !important;
+}
+.som-p2-swatch--out {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.som-p2-couleur-nom {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--som-text);
+}
+
+/* ── Stock sous les tailles ── */
+.som-size-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+.som-size-stock {
+  font-size: 0.68rem;
+  text-align: center;
+}
+.som-size-stock--ok      { color: #81c784; }
+.som-size-stock--low     { color: #ffb74d; }
+.som-size-stock--out     { color: #e57373; }
+.som-size-stock--loading { color: #666; }
+
+/* Cacher produit sélectionné sur panel 2 */
+#panel-2 #som-selected-product,
+#panel-2 .som-selected-product {
+    display: none !important;
+}

@@ -956,75 +956,116 @@
   }
 
   function renderColorBlocks() {
-    const item=panierItemEnCours;
-    if (!item) return;
-    const container=document.getElementById('color-blocks-container');
+    if (!panierItemEnCours) return;
+    var item = panierItemEnCours;
+    var couleurs = item.couleurs || [];
+    var container = document.getElementById('color-blocks-container');
     if (!container) return;
-    const couleurs=item.couleurs.filter(c=>c.disponible);
-
-    // Compteurs impressions
-    const countersEl=document.getElementById('p2-design-counters');
-    if (countersEl&&item.designs.length>0) {
-      const total=getTotalPieces();
-      countersEl.innerHTML=item.designs.map((d,i)=>{
-        const imp=d.positions.length*total;
-        const ok=imp>=MIN_IMPRESSIONS;
-        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border:1px solid '+(ok?'#4a8a4a':'#333')+';margin-bottom:8px;font-size:13px;background:#1a1a1a">'
-          +'<span style="color:#666">Design '+(i+1)+' — '+d.positions.length+' position'+(d.positions.length!==1?'s':'')+'</span>'
-          +'<span class="som-deco-counter'+(ok?' ok':imp>0?' warn':'')+'">'+imp+' impression'+(imp>1?'s':'')+'</span>'
-          +'<span style="font-size:11px;color:#555">/ '+MIN_IMPRESSIONS+' min.</span>'
-          +'</div>';
+    container.innerHTML = item.colorBlocks.map(function(block) {
+      var tailles = getTaillesProduit(item, block.color);
+      var blockTotal = Object.values(block.quantities).reduce(function(a,b){return a+b;}, 0);
+      var stockIdx = couleurs.findIndex(function(c){return c.nom===block.color;});
+      var stockData = (item.stockLive && item.stockLive[stockIdx]) || {};
+      var swatches = couleurs.map(function(c) {
+        var img = c.images && c.images[0] ? c.images[0] : '';
+        var active = c.nom === block.color ? ' som-p2-swatch--active' : '';
+        var dispo = c.disponible ? '' : ' som-p2-swatch--out';
+        return '<div class="som-p2-swatch'+active+dispo+'" title="'+getNomCouleurFR(c.nom)+'" onclick="SOM.updateColorSwatch(\''+block.id+'\',\''+c.nom+'\')" style="width:36px;height:36px;min-width:36px;border-radius:50%;overflow:hidden;cursor:pointer;border:2px solid '+(c.nom===block.color?'#c9a84c':'transparent')+';flex-shrink:0;background:#f5f5f5;">'
+          + (img ? '<img src="'+img+'" alt="'+c.nom+'" style="width:36px;height:36px;object-fit:cover;display:block;">' : '')
+          + '</div>';
       }).join('');
-    }
-
-    container.innerHTML=item.colorBlocks.map(block=>{
-      const colorOptions=couleurs.map(c=>{
-        const hex=getColorHex(c.nom);
-        return '<option value="'+c.nom+'" data-hex="'+hex+'"'+(c.nom===block.color?' selected':'')+'>'+getNomCouleurFR(c.nom)+'</option>';
+      var sizeInputs = tailles.map(function(size) {
+        var stockQty = stockData[size] !== undefined ? stockData[size] : null;
+        var stockHtml = stockQty !== null
+          ? '<span class="som-size-stock '+(stockQty===0?'som-size-stock--out':stockQty<=50?'som-size-stock--low':'som-size-stock--ok')+'">'+(stockQty===0?'Épuisé':stockQty)+' disp.</span>'
+          : '<span class="som-size-stock som-size-stock--loading">...</span>';
+        return '<div class="som-size-cell">'
+          + '<label class="som-size-label">'+size+'</label>'
+          + '<input type="number" class="som-qty-input" min="0" value="'+(block.quantities[size]||0)+'" step="1"'
+          + ' oninput="SOM.updateQty(\''+block.id+'\',\''+size+'\',this.value)">'
+          + stockHtml
+          + '</div>';
       }).join('');
-      const sizeInputs=getTaillesProduit(item,block.color).map(size=>
-        '<div class="som-size-cell"><label class="som-size-label">'+size+'</label>'
-        +'<input type="number" class="som-qty-input" min="0" value="'+(block.quantities[size]||0)+'" step="1"'
-        +' oninput="SOM.updateQty(\''+block.id+'\',\''+size+'\',this.value)"></div>'
-      ).join('');
-      const blockTotal=Object.values(block.quantities).reduce((a,b)=>a+b,0);
-      const hex=getColorHex(block.color);
       return '<div class="som-color-block" id="block-'+block.id+'">'
-        +'<div class="som-color-block__header">'
-        +'<div class="som-color-block__color-select">'
-        +'<div class="som-color-preview" id="preview-'+block.id+'" style="background:'+hex+'"></div>'
-        +'<select class="som-input som-input--color" onchange="SOM.updateColor(\''+block.id+'\',this)">'+colorOptions+'</select>'
-        +'</div>'
-        +'<div class="som-color-block__total"><span id="block-total-'+block.id+'">'+blockTotal+'</span> articles</div>'
-        +(item.colorBlocks.length>1?'<button class="som-btn-remove" type="button" onclick="SOM.removeColorBlock(\''+block.id+'\')" title="Supprimer">×</button>':'')
-        +'</div>'
-        +'<div class="som-size-grid">'+sizeInputs+'</div>'
-        +'</div>';
+        + '<div class="som-color-block__header">'
+        + '<div class="som-p2-couleur-nom">'+getNomCouleurFR(block.color)+'</div>'
+        + '<div class="som-color-block__total"><span id="block-total-'+block.id+'">'+blockTotal+'</span> articles</div>'
+        + (item.colorBlocks.length>1 ? '<button class="som-btn-remove" type="button" onclick="SOM.removeColorBlock(\''+block.id+'\')" title="Supprimer">×</button>' : '')
+        + '</div>'
+        + '<div class="som-p2-swatches" id="swatches-'+block.id+'" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:0.4rem;margin:0.75rem 0;">'+swatches+'</div>'
+        + '<div class="som-size-grid" id="sizes-'+block.id+'">'+sizeInputs+'</div>'
+        + '<div class="som-p2-stock-status" id="stock-status-'+block.id+'"></div>'
+        + '</div>';
     }).join('');
+    // Charger le stock pour chaque bloc si pas encore en cache
+    item.colorBlocks.forEach(function(block) {
+      var idx = couleurs.findIndex(function(c){return c.nom===block.color;});
+      if (idx === -1) return;
+      if (!item.stockLive) item.stockLive = {};
+      if (!item.stockDropship) item.stockDropship = {};
+      if (item.stockLive[idx] === undefined) {
+        chargerStockP2(item.sku, idx, block.id);
+      }
+    });
   }
 
-  function updateColor(blockId,select) {
-    if (!panierItemEnCours) return;
-    const block=panierItemEnCours.colorBlocks.find(b=>b.id===blockId);
-    if (!block) return;
-    block.color=select.value;
-    const hex=select.options[select.selectedIndex].dataset.hex||'#ccc';
-    const preview=document.getElementById('preview-'+blockId);
-    if (preview) preview.style.background=hex;
-    const newTailles=getTaillesProduit(panierItemEnCours,block.color);
-    block.quantities={};
-    newTailles.forEach(s=>block.quantities[s]=0);
-    renderColorBlocks(); updateP2Summary();
+  function chargerStockP2(sku, idx, blockId) {
+    fetch(AJAX+'?action=flask_proxy&endpoint=stock/'+sku+'/'+idx)
+      .then(function(r){return r.json();})
+      .then(function(data) {
+        if (!data.success) return;
+        var item = panierItemEnCours;
+        if (!item) return;
+        if (!item.stockLive) item.stockLive = {};
+        if (!item.stockDropship) item.stockDropship = {};
+        item.stockLive[idx] = data.data.stock || {};
+        item.stockDropship[idx] = data.data.stock_dropship || {};
+        // Mettre à jour les inputs de taille pour ce bloc
+        var block = item.colorBlocks.find(function(b){return b.id===blockId;});
+        if (!block) return;
+        var sizeGrid = document.getElementById('sizes-'+blockId);
+        if (!sizeGrid) return;
+        var tailles = getTaillesProduit(item, block.color);
+        var stockData = item.stockLive[idx] || {};
+        sizeGrid.innerHTML = tailles.map(function(size) {
+          var stockQty = stockData[size] !== undefined ? stockData[size] : null;
+          var stockHtml = stockQty !== null
+            ? '<span class="som-size-stock '+(stockQty===0?'som-size-stock--out':stockQty<=50?'som-size-stock--low':'som-size-stock--ok')+'">'+(stockQty===0?'Épuisé':stockQty)+' disp.</span>'
+            : '';
+          return '<div class="som-size-cell">'
+            + '<label class="som-size-label">'+size+'</label>'
+            + '<input type="number" class="som-qty-input" min="0" value="'+(block.quantities[size]||0)+'" step="1"'
+            + ' oninput="SOM.updateQty(\''+blockId+'\',\''+size+'\',this.value)">'
+            + stockHtml
+            + '</div>';
+        }).join('');
+      }).catch(function(){});
   }
 
-  function updateQty(blockId,size,val) {
+  function updateColorSwatch(blockId, nomCouleur) {
     if (!panierItemEnCours) return;
-    const block=panierItemEnCours.colorBlocks.find(b=>b.id===blockId);
+    var block = panierItemEnCours.colorBlocks.find(function(b){return b.id===blockId;});
     if (!block) return;
-    block.quantities[size]=Math.max(0,parseInt(val)||0);
-    const blockTotal=Object.values(block.quantities).reduce((a,b)=>a+b,0);
-    const totalEl=document.getElementById('block-total-'+blockId);
-    if (totalEl) totalEl.textContent=blockTotal;
+    block.color = nomCouleur;
+    var newTailles = getTaillesProduit(panierItemEnCours, nomCouleur);
+    block.quantities = {};
+    newTailles.forEach(function(s){block.quantities[s]=0;});
+    renderColorBlocks();
+    updateP2Summary();
+  }
+
+  function updateColor(blockId, select) {
+    updateColorSwatch(blockId, select.value);
+  }
+
+  function updateQty(blockId, size, val) {
+    if (!panierItemEnCours) return;
+    var block = panierItemEnCours.colorBlocks.find(function(b){return b.id===blockId;});
+    if (!block) return;
+    block.quantities[size] = Math.max(0, parseInt(val)||0);
+    var blockTotal = Object.values(block.quantities).reduce(function(a,b){return a+b;}, 0);
+    var totalEl = document.getElementById('block-total-'+blockId);
+    if (totalEl) totalEl.textContent = blockTotal;
     updateP2Summary();
   }
 
@@ -1272,7 +1313,7 @@
     goStep,retourCatalogue,retourPanier,
     addDesign,removeDesign,updateDesignType,togglePosition,toggleZoneSVG,
     handleFileDesign,clearLogoDesign,dragOverDesign,dragLeaveDesign,dropFileDesign,updateDesignNotes,
-    addColorBlock,removeColorBlock,updateColor,updateQty,
+    addColorBlock,removeColorBlock,updateColor,updateColorSwatch,updateQty,
     ajouterAuPanier,retirerDuPanier,modifierItem,ajouterAutreProduit,passerAuxCoordonnees,
     buildRecap,
   };
