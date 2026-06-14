@@ -79,20 +79,17 @@ def scrape_produit_live(url_key):
         html = r.text
         if "initConfigurableSwatchOptions" not in html:
             return [], [], None, None
-        product_id_match = re.search(r'"productId":(\d+)', html)
+        product_id_match = re.search(r'initConfigurableSwatchOptions_(\d+)', html)
         product_id = product_id_match.group(1) if product_id_match else None
-
         swatch_match = re.search(
-            r'initConfigurableSwatchOptions\s*\(\s*(\{.*?\})\s*\)',
+            r"""initConfigurableOptions\s*\(\s*[\'\"]\d+[\'\"]\s*,\s*(\{.+?\})\s*\)""",
             html, re.DOTALL
         )
         if not swatch_match:
             return [], [], product_id, None
-
         swatch_data = json.loads(swatch_match.group(1))
         couleurs = []
         tailles  = []
-
         for attr in swatch_data.get("attributes", {}).values():
             label = attr.get("label", "").lower()
             options = attr.get("options", [])
@@ -100,9 +97,7 @@ def scrape_produit_live(url_key):
                 couleurs = [{"id": o["id"], "label": o["label"]} for o in options]
             elif "size" in label or "taille" in label:
                 tailles = [{"id": o["id"], "label": o["label"]} for o in options]
-
         return couleurs, tailles, product_id, swatch_data
-
     except Exception as e:
         return [], [], None, None
 
@@ -111,19 +106,24 @@ def get_stock_warehouse(product_id, color_id):
     url = f"https://www.tshirtideal.ca/rest/V1/warehouse/data/{product_id}-{color_id}"
     try:
         r = requests.get(url, headers=HEADERS, timeout=15)
-        data = json.loads(json.loads(r.text))
-        soup = BeautifulSoup(data, "html.parser")
-        warehouses = {}
-        for wh in soup.select("dl.wh-name"):
-            name = wh.find("dt").text.strip()
-            sizes = {}
-            for li in wh.select("li.ai_store1"):
-                size_label = li.find("span", class_="size-label")
-                qty_span   = li.find("span", class_="qty-value")
-                if size_label and qty_span:
-                    sizes[size_label.text.strip()] = int(qty_span.text.strip() or 0)
-            warehouses[name] = sizes
-        return warehouses
+        outer = json.loads(r.text)
+        data  = json.loads(outer) if isinstance(outer, str) else outer
+        # data = { color_id: { status, response, ... } }
+        color_data = data.get(str(color_id), {})
+        html = color_data.get("response", "")
+        if not html:
+            return {}
+        soup = BeautifulSoup(html, "html.parser")
+        # Additionner le stock de tous les entrepots par taille
+        stock_total = {}
+        for inp in soup.select("li.ai_store1 input.qty"):
+            size_span = inp.find_parent("li").find("span", class_="size")
+            if not size_span:
+                continue
+            size  = size_span.text.strip()
+            qty   = int(inp.get("data-max", 0) or 0)
+            stock_total[size] = stock_total.get(size, 0) + qty
+        return stock_total
     except Exception:
         return {}
 
@@ -170,7 +170,7 @@ def get_produit(sku):
     if not product:
         return jsonify({"erreur": f"Produit {sku} introuvable"}), 404
 
-    url_key = product.get("url_key", "")
+    url_key = product.get("url_key") or product.get("url", "").rstrip("/").split("/")[-1].replace(".html", "")
     couleurs, tailles, product_id, _ = scrape_produit_live(url_key)
 
     stock_par_couleur = {}
