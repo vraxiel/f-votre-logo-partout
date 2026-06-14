@@ -51,3 +51,44 @@ header .woocommerce-product-search {
 .som-hero__text .f-home-logo {
     max-width: 100px !important;
 }
+
+/* Footer dark */
+.site-footer {
+    background-color: #111 !important;
+    color: #888 !important;
+    border-top: 1px solid #222 !important;
+}
+.site-footer a {
+    color: #888 !important;
+}
+.site-footer a:hover {
+    color: #c9a84c !important;
+}
+
+/* Footer centré */
+.site-footer .col-full {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+}
+
+/* Cacher sidebar sur la page soumission */
+.page-template-page-soumission .secondary {
+    display: none !important;
+}
+.page-template-page-soumission .hentry {
+    width: 100% !important;
+    float: none !important;
+}
+
+/* Layout pleine largeur page soumission */
+.page-template-page-soumission #content,
+.page-template-page-soumission .site-content,
+.page-template-page-soumission #primary,
+.page-template-page-soumission .col-full {
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
