@@ -154,6 +154,8 @@ def get_produits():
     products = load_products()
 
     products = [p for p in products if p.get("visible", True)]
+    # Cacher les produits sans aucune couleur disponible
+    products = [p for p in products if any(c.get("disponible") for c in p.get("couleurs", []))]
 
     cat_parent = request.args.get("cat_parent")
     if cat_parent:
