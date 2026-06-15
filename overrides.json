@@ -5,10 +5,38 @@
       "ordre": 1,
       "type": "skus",
       "skus": [
-        "5000B","8000","64V00L","2400","18500","4800","3541","3540","3520",
-        "996MR","3320","SS4500","995MR","993MR","AFX64CRP","18600","3331",
-        "7006","8800-1","TT51","PM1001","PF2000","A230","A324","5100P",
-        "TT15W","YU6606","FF6511","8E019M","6089M","FF5001","FF6277"
+        "5000",
+        "8000",
+        "64V00L",
+        "2400",
+        "18500",
+        "4800",
+        "3541",
+        "3540",
+        "3520",
+        "996MR",
+        "3320",
+        "SS4500",
+        "995MR",
+        "993MR",
+        "AFX64CRP",
+        "18600",
+        "3331",
+        "7006",
+        "8800-1",
+        "TT51",
+        "PM1001",
+        "PF2000",
+        "A230",
+        "A324",
+        "5100P",
+        "TT15W",
+        "YU6606",
+        "FF6511",
+        "8E019M",
+        "6089M",
+        "FF5001",
+        "FF6277"
       ]
     },
     {
@@ -17,16 +45,46 @@
       "type": "catalogue",
       "cat_parent": "T-Shirts",
       "sous_cats": [
-        { "label": "Tous",           "cat_enfant": null },
-        { "label": "Manches courtes","cat_enfant": "Manches courtes" },
-        { "label": "Manches longues","cat_enfant": "Manches longues" },
-        { "label": "Col rond",       "cat_enfant": "Col rond" },
-        { "label": "Col en V",       "cat_enfant": "Col en V" },
-        { "label": "Performance",    "cat_enfant": "Performance" },
-        { "label": "Camisoles",      "cat_enfant": "Camisoles" },
-        { "label": "À capuchon",     "cat_enfant": "À capuchon" },
-        { "label": "Femmes",         "cat_enfant": "Femmes" },
-        { "label": "Polyester 100%", "cat_enfant": "Polyester 100%" }
+        {
+          "label": "Tous",
+          "cat_enfant": null
+        },
+        {
+          "label": "Manches courtes",
+          "cat_enfant": "Manches courtes"
+        },
+        {
+          "label": "Manches longues",
+          "cat_enfant": "Manches longues"
+        },
+        {
+          "label": "Col rond",
+          "cat_enfant": "Col rond"
+        },
+        {
+          "label": "Col en V",
+          "cat_enfant": "Col en V"
+        },
+        {
+          "label": "Performance",
+          "cat_enfant": "Performance"
+        },
+        {
+          "label": "Camisoles",
+          "cat_enfant": "Camisoles"
+        },
+        {
+          "label": "À capuchon",
+          "cat_enfant": "À capuchon"
+        },
+        {
+          "label": "Femmes",
+          "cat_enfant": "Femmes"
+        },
+        {
+          "label": "Polyester 100%",
+          "cat_enfant": "Polyester 100%"
+        }
       ]
     },
     {
@@ -35,14 +93,38 @@
       "type": "catalogue",
       "cat_parent": "Coton ouatés",
       "sous_cats": [
-        { "label": "Tous",             "cat_enfant": null },
-        { "label": "Col arrondi",      "cat_enfant": "Col arrondi" },
-        { "label": "À capuchon",       "cat_enfant": "À capuchon" },
-        { "label": "Zip complet",      "cat_enfant": "Zip complet" },
-        { "label": "Zip quart",        "cat_enfant": "Zip quart" },
-        { "label": "Molleton",         "cat_enfant": "Molleton" },
-        { "label": "Haute visibilité", "cat_enfant": "Haute visibilité" },
-        { "label": "Pantalons",        "cat_enfant": "Pantalons" }
+        {
+          "label": "Tous",
+          "cat_enfant": null
+        },
+        {
+          "label": "Col arrondi",
+          "cat_enfant": "Col arrondi"
+        },
+        {
+          "label": "À capuchon",
+          "cat_enfant": "À capuchon"
+        },
+        {
+          "label": "Zip complet",
+          "cat_enfant": "Zip complet"
+        },
+        {
+          "label": "Zip quart",
+          "cat_enfant": "Zip quart"
+        },
+        {
+          "label": "Molleton",
+          "cat_enfant": "Molleton"
+        },
+        {
+          "label": "Haute visibilité",
+          "cat_enfant": "Haute visibilité"
+        },
+        {
+          "label": "Pantalons",
+          "cat_enfant": "Pantalons"
+        }
       ]
     },
     {
@@ -51,11 +133,26 @@
       "type": "catalogue",
       "cat_parent": "Hoodies",
       "sous_cats": [
-        { "label": "Tous",        "cat_enfant": null },
-        { "label": "Pullover",    "cat_enfant": "Pullover" },
-        { "label": "Zip complet", "cat_enfant": "Zip complet" },
-        { "label": "Polyester",   "cat_enfant": "Polyester" },
-        { "label": "Femmes",      "cat_enfant": "Femmes" }
+        {
+          "label": "Tous",
+          "cat_enfant": null
+        },
+        {
+          "label": "Pullover",
+          "cat_enfant": "Pullover"
+        },
+        {
+          "label": "Zip complet",
+          "cat_enfant": "Zip complet"
+        },
+        {
+          "label": "Polyester",
+          "cat_enfant": "Polyester"
+        },
+        {
+          "label": "Femmes",
+          "cat_enfant": "Femmes"
+        }
       ]
     },
     {
@@ -64,13 +161,34 @@
       "type": "catalogue",
       "cat_parent": "Polos",
       "sous_cats": [
-        { "label": "Tous",        "cat_enfant": null },
-        { "label": "Jersey",      "cat_enfant": "Jersey" },
-        { "label": "Performance", "cat_enfant": "Performance" },
-        { "label": "Piqué",       "cat_enfant": "Piqué" },
-        { "label": "Sport",       "cat_enfant": "Sport" },
-        { "label": "Avec poche",  "cat_enfant": "Avec poche" },
-        { "label": "Golf",        "cat_enfant": "Golf" }
+        {
+          "label": "Tous",
+          "cat_enfant": null
+        },
+        {
+          "label": "Jersey",
+          "cat_enfant": "Jersey"
+        },
+        {
+          "label": "Performance",
+          "cat_enfant": "Performance"
+        },
+        {
+          "label": "Piqué",
+          "cat_enfant": "Piqué"
+        },
+        {
+          "label": "Sport",
+          "cat_enfant": "Sport"
+        },
+        {
+          "label": "Avec poche",
+          "cat_enfant": "Avec poche"
+        },
+        {
+          "label": "Golf",
+          "cat_enfant": "Golf"
+        }
       ]
     },
     {
@@ -79,22 +197,70 @@
       "type": "catalogue",
       "cat_parent": "Athletic Wear",
       "sous_cats": [
-        { "label": "Tous",        "cat_enfant": null },
-        { "label": "Performance", "cat_enfant": "Performance" },
-        { "label": "Team Wear",   "cat_enfant": "Team Wear" },
-        { "label": "Shorts",      "cat_enfant": "Shorts" },
-        { "label": "Pantalons",   "cat_enfant": "Pantalons" },
-        { "label": "Vestes",      "cat_enfant": "Vestes" },
-        { "label": "Pullovers",   "cat_enfant": "Pullovers" },
-        { "label": "Zip quart",   "cat_enfant": "Zip quart" },
-        { "label": "Baseball",    "cat_enfant": "Baseball" },
-        { "label": "Basketball",  "cat_enfant": "Basketball" },
-        { "label": "Hockey",      "cat_enfant": "Hockey" },
-        { "label": "Soccer",      "cat_enfant": "Soccer" },
-        { "label": "Volleyball",  "cat_enfant": "Volleyball" },
-        { "label": "Lacrosse",    "cat_enfant": "Lacrosse" },
-        { "label": "Football",    "cat_enfant": "Football" },
-        { "label": "Cyclisme",    "cat_enfant": "Cyclisme" }
+        {
+          "label": "Tous",
+          "cat_enfant": null
+        },
+        {
+          "label": "Performance",
+          "cat_enfant": "Performance"
+        },
+        {
+          "label": "Team Wear",
+          "cat_enfant": "Team Wear"
+        },
+        {
+          "label": "Shorts",
+          "cat_enfant": "Shorts"
+        },
+        {
+          "label": "Pantalons",
+          "cat_enfant": "Pantalons"
+        },
+        {
+          "label": "Vestes",
+          "cat_enfant": "Vestes"
+        },
+        {
+          "label": "Pullovers",
+          "cat_enfant": "Pullovers"
+        },
+        {
+          "label": "Zip quart",
+          "cat_enfant": "Zip quart"
+        },
+        {
+          "label": "Baseball",
+          "cat_enfant": "Baseball"
+        },
+        {
+          "label": "Basketball",
+          "cat_enfant": "Basketball"
+        },
+        {
+          "label": "Hockey",
+          "cat_enfant": "Hockey"
+        },
+        {
+          "label": "Soccer",
+          "cat_enfant": "Soccer"
+        },
+        {
+          "label": "Volleyball",
+          "cat_enfant": "Volleyball"
+        },
+        {
+          "label": "Lacrosse",
+          "cat_enfant": "Lacrosse"
+        },
+        {
+          "label": "Football",
+          "cat_enfant": "Football"
+        },
+        {
+          "label": "Cyclisme",
+          "cat_enfant": "Cyclisme"
+        }
       ]
     },
     {
@@ -103,17 +269,50 @@
       "type": "catalogue",
       "cat_parent": "Casquettes",
       "sous_cats": [
-        { "label": "Toutes",       "cat_enfant": null },
-        { "label": "6 panneaux",   "cat_enfant": "6 panneaux" },
-        { "label": "5 panneaux",   "cat_enfant": "5 panneaux" },
-        { "label": "Snapback",     "cat_enfant": "Snapback" },
-        { "label": "Trucker",      "cat_enfant": "Trucker" },
-        { "label": "Ajustées",     "cat_enfant": "Ajustées" },
-        { "label": "Dos ouvert",   "cat_enfant": "Dos ouvert" },
-        { "label": "Profil bas",   "cat_enfant": "Profil bas" },
-        { "label": "Profil moyen", "cat_enfant": "Profil moyen" },
-        { "label": "Visières",     "cat_enfant": "Visières" },
-        { "label": "Camouflage",   "cat_enfant": "Camouflage" }
+        {
+          "label": "Toutes",
+          "cat_enfant": null
+        },
+        {
+          "label": "6 panneaux",
+          "cat_enfant": "6 panneaux"
+        },
+        {
+          "label": "5 panneaux",
+          "cat_enfant": "5 panneaux"
+        },
+        {
+          "label": "Snapback",
+          "cat_enfant": "Snapback"
+        },
+        {
+          "label": "Trucker",
+          "cat_enfant": "Trucker"
+        },
+        {
+          "label": "Ajustées",
+          "cat_enfant": "Ajustées"
+        },
+        {
+          "label": "Dos ouvert",
+          "cat_enfant": "Dos ouvert"
+        },
+        {
+          "label": "Profil bas",
+          "cat_enfant": "Profil bas"
+        },
+        {
+          "label": "Profil moyen",
+          "cat_enfant": "Profil moyen"
+        },
+        {
+          "label": "Visières",
+          "cat_enfant": "Visières"
+        },
+        {
+          "label": "Camouflage",
+          "cat_enfant": "Camouflage"
+        }
       ]
     },
     {
@@ -122,10 +321,22 @@
       "type": "catalogue",
       "cat_parent": "Pantalons & Shorts",
       "sous_cats": [
-        { "label": "Tous",        "cat_enfant": null },
-        { "label": "Pantalons",   "cat_enfant": "Pantalons" },
-        { "label": "Shorts",      "cat_enfant": "Shorts" },
-        { "label": "Molletonnés", "cat_enfant": "Molletonnés" }
+        {
+          "label": "Tous",
+          "cat_enfant": null
+        },
+        {
+          "label": "Pantalons",
+          "cat_enfant": "Pantalons"
+        },
+        {
+          "label": "Shorts",
+          "cat_enfant": "Shorts"
+        },
+        {
+          "label": "Molletonnés",
+          "cat_enfant": "Molletonnés"
+        }
       ]
     },
     {
@@ -134,16 +345,46 @@
       "type": "catalogue",
       "cat_parent": "Outerwear",
       "sous_cats": [
-        { "label": "Tous",         "cat_enfant": null },
-        { "label": "Vestes",       "cat_enfant": "Vestes" },
-        { "label": "Zip complet",  "cat_enfant": "Zip complet" },
-        { "label": "Imperméable",  "cat_enfant": "Imperméable" },
-        { "label": "Zip quart",    "cat_enfant": "Zip quart" },
-        { "label": "Performance",  "cat_enfant": "Performance" },
-        { "label": "Coupe-vent",   "cat_enfant": "Coupe-vent" },
-        { "label": "Molleton",     "cat_enfant": "Molleton" },
-        { "label": "Doudounes",    "cat_enfant": "Doudounes" },
-        { "label": "Polar Fleece", "cat_enfant": "Polar Fleece" }
+        {
+          "label": "Tous",
+          "cat_enfant": null
+        },
+        {
+          "label": "Vestes",
+          "cat_enfant": "Vestes"
+        },
+        {
+          "label": "Zip complet",
+          "cat_enfant": "Zip complet"
+        },
+        {
+          "label": "Imperméable",
+          "cat_enfant": "Imperméable"
+        },
+        {
+          "label": "Zip quart",
+          "cat_enfant": "Zip quart"
+        },
+        {
+          "label": "Performance",
+          "cat_enfant": "Performance"
+        },
+        {
+          "label": "Coupe-vent",
+          "cat_enfant": "Coupe-vent"
+        },
+        {
+          "label": "Molleton",
+          "cat_enfant": "Molleton"
+        },
+        {
+          "label": "Doudounes",
+          "cat_enfant": "Doudounes"
+        },
+        {
+          "label": "Polar Fleece",
+          "cat_enfant": "Polar Fleece"
+        }
       ]
     },
     {
@@ -152,11 +393,26 @@
       "type": "catalogue",
       "cat_parent": "Dress Shirt",
       "sous_cats": [
-        { "label": "Tous",            "cat_enfant": null },
-        { "label": "Manches longues", "cat_enfant": "Manches longues" },
-        { "label": "Manches courtes", "cat_enfant": "Manches courtes" },
-        { "label": "Poches",          "cat_enfant": "Poches" },
-        { "label": "Plackets",        "cat_enfant": "Plackets" }
+        {
+          "label": "Tous",
+          "cat_enfant": null
+        },
+        {
+          "label": "Manches longues",
+          "cat_enfant": "Manches longues"
+        },
+        {
+          "label": "Manches courtes",
+          "cat_enfant": "Manches courtes"
+        },
+        {
+          "label": "Poches",
+          "cat_enfant": "Poches"
+        },
+        {
+          "label": "Plackets",
+          "cat_enfant": "Plackets"
+        }
       ]
     },
     {
@@ -165,10 +421,22 @@
       "type": "catalogue",
       "cat_parent": "Toques",
       "sous_cats": [
-        { "label": "Toutes", "cat_enfant": null },
-        { "label": "Hommes", "cat_enfant": "Hommes" },
-        { "label": "Femmes", "cat_enfant": "Femmes" },
-        { "label": "Jeunes", "cat_enfant": "Jeunes" }
+        {
+          "label": "Toutes",
+          "cat_enfant": null
+        },
+        {
+          "label": "Hommes",
+          "cat_enfant": "Hommes"
+        },
+        {
+          "label": "Femmes",
+          "cat_enfant": "Femmes"
+        },
+        {
+          "label": "Jeunes",
+          "cat_enfant": "Jeunes"
+        }
       ]
     },
     {
@@ -177,12 +445,30 @@
       "type": "catalogue",
       "cat_parent": "Sacs",
       "sous_cats": [
-        { "label": "Tous",                "cat_enfant": null },
-        { "label": "Sacs à dos",          "cat_enfant": "Sacs à dos" },
-        { "label": "Totes",               "cat_enfant": "Totes" },
-        { "label": "Duffles",             "cat_enfant": "Duffles" },
-        { "label": "Gym sacks",           "cat_enfant": "Gym sacks" },
-        { "label": "Totes réutilisables", "cat_enfant": "Totes réutilisables" }
+        {
+          "label": "Tous",
+          "cat_enfant": null
+        },
+        {
+          "label": "Sacs à dos",
+          "cat_enfant": "Sacs à dos"
+        },
+        {
+          "label": "Totes",
+          "cat_enfant": "Totes"
+        },
+        {
+          "label": "Duffles",
+          "cat_enfant": "Duffles"
+        },
+        {
+          "label": "Gym sacks",
+          "cat_enfant": "Gym sacks"
+        },
+        {
+          "label": "Totes réutilisables",
+          "cat_enfant": "Totes réutilisables"
+        }
       ]
     },
     {
@@ -191,17 +477,37 @@
       "type": "catalogue",
       "cat_parent": "Accessoires",
       "sous_cats": [
-        { "label": "Tous",        "cat_enfant": null },
-        { "label": "Tabliers",    "cat_enfant": "Tabliers" },
-        { "label": "Écharpes",    "cat_enfant": "Écharpes" },
-        { "label": "Cache-cou",   "cat_enfant": "Cache-cou" },
-        { "label": "Couvertures", "cat_enfant": "Couvertures" },
-        { "label": "Serviettes",  "cat_enfant": "Serviettes" },
-        { "label": "Bandeau",     "cat_enfant": "Bandeau" }
+        {
+          "label": "Tous",
+          "cat_enfant": null
+        },
+        {
+          "label": "Tabliers",
+          "cat_enfant": "Tabliers"
+        },
+        {
+          "label": "Écharpes",
+          "cat_enfant": "Écharpes"
+        },
+        {
+          "label": "Cache-cou",
+          "cat_enfant": "Cache-cou"
+        },
+        {
+          "label": "Couvertures",
+          "cat_enfant": "Couvertures"
+        },
+        {
+          "label": "Serviettes",
+          "cat_enfant": "Serviettes"
+        },
+        {
+          "label": "Bandeau",
+          "cat_enfant": "Bandeau"
+        }
       ]
     }
   ],
-
   "DG402": {
     "cat_parent": "Casquettes",
     "cat_enfant": "Snapback",
@@ -209,21 +515,18 @@
     "vedette": false,
     "note_interne": "Fix bug catégorie mai 2026"
   },
-
-  "5000B": {
+  "5000": {
     "visible": true,
     "vedette": true,
     "ordre": 1,
     "note_interne": "T-shirt vedette principal"
   },
-
   "8000": {
     "visible": true,
     "vedette": true,
     "ordre": 2,
     "note_interne": "Gildan DryBlend — vedette"
   },
-
   "64V00L": {
     "visible": true,
     "vedette": true,
