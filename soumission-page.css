@@ -596,3 +596,26 @@
 #panel-2 .som-selected-product {
     display: none !important;
 }
+
+@media (max-width: 768px) {
+  .site-header-cart,
+  .handheld-navigation,
+  .storefront-handheld-footer-bar {
+    display: none !important;
+  }
+}
+
+/* Masquer badges WooCommerce sur les swatches */
+.som-swatch { position: relative; z-index: 1; }
+.som-swatch .count,
+.som-swatch span.count,
+.som-card__swatches .count {
+  display: none !important;
+}
+
+/* Masquer le point de stock sur les swatches en mobile */
+@media (max-width: 768px) {
+  .som-stock-dot {
+    display: none !important;
+  }
+}
